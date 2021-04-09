@@ -1,16 +1,13 @@
-.idea
-*.iml
-build/
-bower_components/
-*.sw?
+.husky
 .DS_Store
 test/coverage/
 node_modules
 
 # generated
-lib/ace-adapter.js
-dist/firepad.zip
-dist/
+dist
+lib
+es
+types
 
 *.log
 _site/

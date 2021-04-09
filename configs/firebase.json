@@ -1,0 +1,5 @@
+{
+  "apiKey": "<API_KEY>",
+  "databaseURL": "https://krackjack-test.firebaseio.com",
+  "projectId": "krackjack-test"
+}

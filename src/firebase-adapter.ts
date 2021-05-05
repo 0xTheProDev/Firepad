@@ -200,7 +200,7 @@ export class FirebaseAdapter implements IDatabaseAdapter {
   }
 
   isCurrentUser(clientId: string): boolean {
-    return this._userId === clientId;
+    return this._userId == clientId;
   }
 
   on(

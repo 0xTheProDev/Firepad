@@ -1,14 +1,15 @@
 {
   "name": "@hackerrank/firepad",
   "description": "Collaborative text editing powered by Firebase",
-  "version": "0.1.0-action-4",
+  "version": "0.1.0-cursor-11",
   "author": {
     "email": "bprogyan@gmail.com",
     "name": "Progyan Bhattacharya",
     "url": "https://github.com/Progyan1997"
   },
   "contributors": [
-    "Michael Lehenbauer <michael@firebase.com>"
+    "Michael Lehenbauer <michael@firebase.com>",
+    "Nishchay Kaushik"
   ],
   "maintainers": [
     {

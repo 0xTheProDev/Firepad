@@ -369,8 +369,8 @@ export class MonacoAdapter implements IEditorAdapter {
           []
         );
 
-        // Dispose Cursor Widget
-        this._cursorWidgetController.removeCursor(clientID);
+        // Dont remove the name tooltip like below, else it will cause flicker as you type
+        // this._cursorWidgetController.removeCursor(clientID);
       },
     };
   }

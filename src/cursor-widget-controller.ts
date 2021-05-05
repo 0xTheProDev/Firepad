@@ -40,9 +40,11 @@ export interface ICursorWidgetController extends IDisposable {
 export class CursorWidgetController implements ICursorWidgetController {
   protected readonly _cursors: Map<ClientIDType, ICursorWidget>;
   protected readonly _editor: monaco.editor.IStandaloneCodeEditor;
+  protected readonly _tooltipDuration: number;
 
   constructor(editor: monaco.editor.IStandaloneCodeEditor) {
     this._editor = editor;
+    this._tooltipDuration = 1000;
     this._cursors = new Map<ClientIDType, ICursorWidget>();
   }
 
@@ -53,11 +55,15 @@ export class CursorWidgetController implements ICursorWidgetController {
     userName?: string
   ): void {
     const cursorWidget = new CursorWidget({
-      clientId,
-      editor: this._editor,
+      codeEditor: this._editor,
+      widgetId: clientId,
+      color: userColor,
       range,
-      userColor,
-      userName: userName || clientId.toString(),
+      label: userName || clientId.toString(),
+      tooltipDuration: this._tooltipDuration,
+      onDisposed: () => {
+        this.removeCursor(clientId);
+      },
     });
 
     this._cursors.set(clientId, cursorWidget);

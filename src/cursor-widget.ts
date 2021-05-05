@@ -1,13 +1,24 @@
+/*
+ * Copyright (c) 2019 Convergence Labs, Inc.
+ *
+ * This file is part of the Monaco Collaborative Extensions, which is
+ * released under the terms of the MIT license. A copy of the MIT license
+ * is usually provided as part of this source code package in the LICENCE
+ * file. If it was not, please see <https://opensource.org/licenses/MIT>
+ */
+
 import * as monaco from "monaco-editor";
 import { ClientIDType } from "./editor-adapter";
 import { IDisposable, Utils } from "./utils";
 
 export interface ICursorWidgetConstructorOptions {
-  clientId: ClientIDType;
-  editor: monaco.editor.IStandaloneCodeEditor;
+  codeEditor: monaco.editor.ICodeEditor;
+  widgetId: ClientIDType;
+  color: string;
+  label: string;
   range: monaco.Range;
-  userColor: string;
-  userName: string;
+  tooltipDuration?: number;
+  onDisposed: OnDisposed;
 }
 
 export interface ICursorWidget
@@ -15,9 +26,9 @@ export interface ICursorWidget
     IDisposable {
   /**
    * Update Widget position according to the Cursor position.
-   * @param position - Current Position of the Cursor.
+   * @param range - Current Position of the Cursor.
    */
-  updatePosition(position: monaco.Range): void;
+  updatePosition(range: monaco.Range): void;
   /**
    * Update Widget content when Username changes.
    * @param userName - New Username of the current User.
@@ -25,75 +36,151 @@ export interface ICursorWidget
   updateContent(userName?: string): void;
 }
 
-export class CursorWidget implements ICursorWidget {
-  protected readonly _domNode: HTMLElement;
-  protected readonly _editor: monaco.editor.IStandaloneCodeEditor;
-  protected readonly _id: ClientIDType;
+type OnDisposed = () => void;
 
-  protected _color: string;
-  protected _content: string;
-  protected _range: monaco.Range;
-
-  readonly allowEditorOverflow: boolean;
-
+/**
+ * This class implements a Monaco Content Widget to render a remote user's
+ * name in a tooltip.
+ *
+ * @internal
+ */
+export class CursorWidget
+  implements monaco.editor.IContentWidget, IDisposable, ICursorWidget {
+  private readonly _id: string;
+  private readonly _editor: monaco.editor.ICodeEditor;
+  private readonly _domNode: HTMLElement;
+  private _tooltipNode: HTMLElement;
+  private readonly _tooltipDuration: number;
+  private readonly _scrollListener: IDisposable | null;
+  private readonly _onDisposed: OnDisposed;
   static readonly WIDGET_NODE_CLASSNAME = "firepad-remote-cursor";
   static readonly MESSAGE_NODE_CLASSNAME = "firepad-remote-cursor-message";
 
+  protected _color: string;
+  protected _content: string;
+  private _position: monaco.editor.IContentWidgetPosition | null;
+  private _hideTimer: any;
+  private _disposed: boolean;
+
   constructor({
-    editor,
+    codeEditor,
+    widgetId,
+    color,
+    label,
     range,
-    userColor,
-    clientId,
-    userName,
+    tooltipDuration = 1000,
+    onDisposed,
   }: ICursorWidgetConstructorOptions) {
-    this.allowEditorOverflow = true;
-
-    this._id = clientId;
-    this._editor = editor;
-
-    this._color = userColor;
-    this._content = userName;
-    this._range = range;
+    this._editor = codeEditor;
+    this._tooltipDuration = tooltipDuration;
+    this._id = `monaco-remote-cursor-${widgetId}`;
+    this._onDisposed = onDisposed;
+    this._color = color;
+    this._content = label;
 
     this._domNode = this._createWidgetNode();
+
+    // we only need to listen to scroll positions to update the
+    // tooltip location on scrolling.
+    this._scrollListener = this._editor.onDidScrollChange(() => {
+      this._updateTooltipPosition();
+    });
+
+    this.updatePosition(range);
+
+    this._hideTimer = null;
     this._editor.addContentWidget(this);
+
+    this._disposed = false;
   }
 
-  getId(): string {
-    return `firepad.cursor.${this._id}`;
+  public getId(): string {
+    return this._id;
   }
 
-  getDomNode(): HTMLElement {
+  public getDomNode(): HTMLElement {
     return this._domNode;
   }
 
-  getPosition(): monaco.editor.IContentWidgetPosition {
-    return {
-      position: this._range.getEndPosition(),
-      range: this._range,
-      preference: [
-        monaco.editor.ContentWidgetPositionPreference.ABOVE,
-        monaco.editor.ContentWidgetPositionPreference.BELOW,
-      ],
-    };
+  public getPosition(): monaco.editor.IContentWidgetPosition | null {
+    return this._position;
   }
 
-  updatePosition(range: monaco.Range): void {
-    this._range = range;
-    this._editor.layoutContentWidget(this);
+  public updatePosition(range: monaco.Range): void {
+    this._updatePosition(range);
+    setTimeout(() => this._showTooltip(), 0);
   }
 
   updateContent(userName?: string): void {
     if (typeof userName !== "string" || userName === this._content) {
       return;
     }
-
-    const messageNode = this._domNode.firstChild!;
-    messageNode.textContent = userName;
+    this._tooltipNode.textContent = userName;
   }
 
-  dispose(): void {
+  public dispose(): void {
+    if (this._disposed) {
+      return;
+    }
+
     this._editor.removeContentWidget(this);
+    if (this._scrollListener !== null) {
+      this._scrollListener.dispose();
+    }
+
+    this._disposed = true;
+    this._onDisposed();
+  }
+
+  public isDisposed(): boolean {
+    return this._disposed;
+  }
+
+  private _updatePosition(range: monaco.Range): void {
+    this._position = {
+      position: range.getEndPosition(),
+      preference: [
+        monaco.editor.ContentWidgetPositionPreference.ABOVE,
+        monaco.editor.ContentWidgetPositionPreference.BELOW,
+      ],
+    };
+
+    this._editor.layoutContentWidget(this);
+  }
+
+  private _showTooltip(): void {
+    this._updateTooltipPosition();
+
+    if (this._hideTimer !== null) {
+      clearTimeout(this._hideTimer);
+    } else {
+      this._setTooltipVisible(true);
+    }
+
+    this._hideTimer = setTimeout(() => {
+      this._setTooltipVisible(false);
+      this._hideTimer = null;
+    }, this._tooltipDuration);
+  }
+
+  private _updateTooltipPosition(): void {
+    const distanceFromTop =
+      this._domNode.offsetTop - this._editor.getScrollTop();
+    if (distanceFromTop - this._tooltipNode.offsetHeight < 5) {
+      this._tooltipNode.style.top = `${this._tooltipNode.offsetHeight + 2}px`;
+    } else {
+      this._tooltipNode.style.top = `-${this._tooltipNode.offsetHeight}px`;
+    }
+
+    this._tooltipNode.style.left = "0";
+  }
+
+  private _setTooltipVisible(visible: boolean): void {
+    if (visible) {
+      this._tooltipNode.style.opacity = "1.0";
+    } else {
+      this._tooltipNode.style.opacity = "0";
+    }
   }
 
   protected _colorWithCSSVars(property: string): string {
@@ -106,6 +193,11 @@ export class CursorWidget implements ICursorWidget {
 
     messageNode.style.borderColor = this._colorWithCSSVars("border");
     messageNode.style.backgroundColor = this._colorWithCSSVars("bg");
+    messageNode.style.color = Utils.getTextColor(this._color);
+    messageNode.style.borderRadius = "2px";
+    messageNode.style.fontSize = "12px";
+    messageNode.style.padding = "2px 8px";
+    messageNode.style.whiteSpace = "nowrap";
 
     messageNode.textContent = this._content;
 
@@ -117,31 +209,16 @@ export class CursorWidget implements ICursorWidget {
     return messageNode;
   }
 
-  protected _createArrowDownNode(): HTMLElement {
-    const size = "0",
-      border = "5px solid",
-      borderColor = "transparent";
-
-    const arrowDownNode = document.createElement("div");
-
-    arrowDownNode.style.width = arrowDownNode.style.height = size;
-    arrowDownNode.style.borderTop = arrowDownNode.style.borderLeft = arrowDownNode.style.borderRight = border;
-    arrowDownNode.style.borderLeftColor = arrowDownNode.style.borderRightColor = borderColor;
-    arrowDownNode.style.borderTopColor = this._colorWithCSSVars("border");
-
-    return arrowDownNode;
-  }
-
   protected _createWidgetNode(): HTMLElement {
     Utils.validateTruth(document != null, "This package must run on browser!");
 
     const widgetNode = document.createElement("div");
+    widgetNode.style.height = "20px";
+    widgetNode.style.paddingBottom = "0px";
+    widgetNode.style.transition = "all 0.1s linear";
 
-    const messageNode = this._createMessageNode();
-    widgetNode.appendChild(messageNode);
-
-    const arrowDownNode = this._createArrowDownNode();
-    widgetNode.appendChild(arrowDownNode);
+    this._tooltipNode = this._createMessageNode();
+    widgetNode.appendChild(this._tooltipNode);
 
     widgetNode.classList.add(
       "monaco-editor-overlaymessage",

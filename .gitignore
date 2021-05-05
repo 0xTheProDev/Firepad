@@ -13,3 +13,5 @@ types
 _site/
 .firebase/
 target
+.idea
+.vscode

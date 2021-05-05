@@ -15,7 +15,7 @@
       /* Height / width / positioning can be customized for your use case.
            For demo purposes, we make firepad fill the entire browser. */
       #firepad {
-        --color-bg-firepad-remote-cursor: #1e1e1e;
+        /*--color-bg-firepad-remote-cursor: #1e1e1e;*/
 
         width: 100%;
         height: 100%;
@@ -25,6 +25,9 @@
         border-style: solid;
         opacity: 0.8;
         padding: 1px;
+      }
+      [class*="remote-client-selection"]{
+        opacity: 0.5;
       }
     </style>
   </head>

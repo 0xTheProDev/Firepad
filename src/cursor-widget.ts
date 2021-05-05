@@ -34,6 +34,11 @@ export interface ICursorWidget
    * @param userName - New Username of the current User.
    */
   updateContent(userName?: string): void;
+
+  /**
+   * Returns whether the widget was disposed or not.
+   */
+  isDisposed(): boolean;
 }
 
 type OnDisposed = () => void;
@@ -46,21 +51,22 @@ type OnDisposed = () => void;
  */
 export class CursorWidget
   implements monaco.editor.IContentWidget, IDisposable, ICursorWidget {
-  private readonly _id: string;
-  private readonly _editor: monaco.editor.ICodeEditor;
-  private readonly _domNode: HTMLElement;
-  private _tooltipNode: HTMLElement;
-  private readonly _tooltipDuration: number;
-  private readonly _scrollListener: IDisposable | null;
-  private readonly _onDisposed: OnDisposed;
-  static readonly WIDGET_NODE_CLASSNAME = "firepad-remote-cursor";
-  static readonly MESSAGE_NODE_CLASSNAME = "firepad-remote-cursor-message";
+  protected readonly _id: string;
+  protected readonly _editor: monaco.editor.ICodeEditor;
+  protected readonly _domNode: HTMLElement;
+  protected readonly _tooltipDuration: number;
+  protected readonly _scrollListener: IDisposable | null;
+  protected readonly _onDisposed: OnDisposed;
 
+  protected _tooltipNode: HTMLElement;
   protected _color: string;
   protected _content: string;
-  private _position: monaco.editor.IContentWidgetPosition | null;
-  private _hideTimer: any;
-  private _disposed: boolean;
+  protected _position: monaco.editor.IContentWidgetPosition | null;
+  protected _hideTimer: any;
+  protected _disposed: boolean;
+
+  static readonly WIDGET_NODE_CLASSNAME = "firepad-remote-cursor";
+  static readonly MESSAGE_NODE_CLASSNAME = "firepad-remote-cursor-message";
 
   constructor({
     codeEditor,
@@ -94,19 +100,19 @@ export class CursorWidget
     this._disposed = false;
   }
 
-  public getId(): string {
+  getId(): string {
     return this._id;
   }
 
-  public getDomNode(): HTMLElement {
+  getDomNode(): HTMLElement {
     return this._domNode;
   }
 
-  public getPosition(): monaco.editor.IContentWidgetPosition | null {
+  getPosition(): monaco.editor.IContentWidgetPosition | null {
     return this._position;
   }
 
-  public updatePosition(range: monaco.Range): void {
+  updatePosition(range: monaco.Range): void {
     this._updatePosition(range);
     setTimeout(() => this._showTooltip(), 0);
   }
@@ -118,7 +124,7 @@ export class CursorWidget
     this._tooltipNode.textContent = userName;
   }
 
-  public dispose(): void {
+  dispose(): void {
     if (this._disposed) {
       return;
     }
@@ -132,11 +138,11 @@ export class CursorWidget
     this._onDisposed();
   }
 
-  public isDisposed(): boolean {
+  isDisposed(): boolean {
     return this._disposed;
   }
 
-  private _updatePosition(range: monaco.Range): void {
+  protected _updatePosition(range: monaco.Range): void {
     this._position = {
       position: range.getEndPosition(),
       preference: [
@@ -148,7 +154,7 @@ export class CursorWidget
     this._editor.layoutContentWidget(this);
   }
 
-  private _showTooltip(): void {
+  protected _showTooltip(): void {
     this._updateTooltipPosition();
 
     if (this._hideTimer !== null) {
@@ -163,7 +169,7 @@ export class CursorWidget
     }, this._tooltipDuration);
   }
 
-  private _updateTooltipPosition(): void {
+  protected _updateTooltipPosition(): void {
     const distanceFromTop =
       this._domNode.offsetTop - this._editor.getScrollTop();
     if (distanceFromTop - this._tooltipNode.offsetHeight < 5) {
@@ -175,7 +181,7 @@ export class CursorWidget
     this._tooltipNode.style.left = "0";
   }
 
-  private _setTooltipVisible(visible: boolean): void {
+  protected _setTooltipVisible(visible: boolean): void {
     if (visible) {
       this._tooltipNode.style.opacity = "1.0";
     } else {

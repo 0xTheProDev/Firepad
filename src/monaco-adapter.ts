@@ -40,10 +40,10 @@ export class MonacoAdapter implements IEditorAdapter {
   protected _lastCursorRange: monaco.Selection | null;
   protected _emitter: IEventEmitter | null;
   protected _cursorTimeout: NodeJS.Timeout | null;
-  protected _undo: UndoRedoCallbackType | null;
-  protected _redo: UndoRedoCallbackType | null;
-  protected _originalUndo: UndoRedoCallbackType | null;
-  protected _originalRedo: UndoRedoCallbackType | null;
+  protected _undo: UndoRedoCallbackType | undefined;
+  protected _redo: UndoRedoCallbackType | undefined;
+  protected _originalUndo: UndoRedoCallbackType | undefined;
+  protected _originalRedo: UndoRedoCallbackType | undefined;
 
   /**
    * Wraps a monaco editor in adapter to work with rest of Firepad
@@ -62,10 +62,10 @@ export class MonacoAdapter implements IEditorAdapter {
     this._remoteCursors = new Map<ClientIDType, IRemoteCursor>();
     this._cursorWidgetController = new CursorWidgetController(this._monaco);
 
-    this._redo = null;
-    this._undo = null;
-    this._originalRedo = null;
-    this._originalUndo = null;
+    this._redo = undefined;
+    this._undo = undefined;
+    this._originalRedo = undefined;
+    this._originalUndo = undefined;
     this._cursorTimeout = null;
     this._ignoreChanges = false;
 
@@ -137,8 +137,8 @@ export class MonacoAdapter implements IEditorAdapter {
       model.redo = this._originalRedo;
     }
 
-    this._originalUndo = null;
-    this._originalRedo = null;
+    this._originalUndo = undefined;
+    this._originalRedo = undefined;
   }
 
   /**

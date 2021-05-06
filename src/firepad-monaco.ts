@@ -20,7 +20,8 @@ export function fromMonaco(
 ): IFirepad {
   // Initialize constructor options with their default values
   const userId: UserIDType = options.userId || uuid();
-  const userColor: string = options.userColor || Utils.colorFromUserId(userId.toString());
+  const userColor: string =
+    options.userColor || Utils.colorFromUserId(userId.toString());
   const userName: string = options.userName || userId.toString();
   const defaultText: string = options.defaultText || editor.getValue();
 

@@ -5,3 +5,4 @@
 * Add support for multiple cursors.
 * Add Proper Codeowner file.
 * Move whole release script into GitHub action.
+* Update README with new changes. (Strech: Github Action to generate `docs` branch)

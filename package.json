@@ -16,7 +16,8 @@
       "email": "developers@hackerrank.com",
       "name": "HackerRank",
       "url": "https://hackerrank.com"
-    }
+    },
+    "Firebase (https://firebase.google.com/)"
   ],
   "homepage": "http://www.firepad.io/",
   "repository": {
@@ -31,6 +32,7 @@
     "text",
     "word",
     "editor",
+    "monaco",
     "firebase",
     "realtime",
     "collaborative"

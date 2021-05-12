@@ -189,6 +189,7 @@ export class FirebaseAdapter implements IDatabaseAdapter {
       this._emitter = null;
     }
 
+    this._removeFirebaseCallbacks();
     this._databaseRef = null;
     this._userRef = null;
     this._document = null;
@@ -234,6 +235,9 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     return this._emitter?.trigger(event, eventArgs || {}, ...extraArgs);
   }
 
+  /**
+   * Setup user indicator data and hooks in `users` node in Firebase ref.
+   */
   protected _initializeUserData(): void {
     this._userRef!.child("cursor").onDisconnect().remove();
     this._userRef!.child("color").onDisconnect().remove();
@@ -242,6 +246,9 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     this.sendCursor(this._userCursor || null);
   }
 
+  /**
+   * Fetch latest Document state from `checkpoint` node of Firebase ref once.
+   */
   protected _monitorHistory(): void {
     // Get the latest checkpoint as a starting point so we don't have to re-play entire history.
     this._databaseRef!.child("checkpoint").once("value", (snapshot) => {
@@ -265,6 +272,10 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     });
   }
 
+  /**
+   * Callback listener for `child_added` event on `history` node of Firebase ref.
+   * @param revisionSnapshot - JSON serializable data snapshot of the child.
+   */
   protected _historyChildAdded(
     revisionSnapshot: firebase.database.DataSnapshot
   ): void {
@@ -278,6 +289,10 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     }
   }
 
+  /**
+   * Attach listeners for `child_added` event on `history` node of Firebase ref after given entry, and apply changes that are pending in `history` node.
+   * @param revision - Intial revision to start monitoring from.
+   */
   protected _monitorHistoryStartingAt(revision: number): void {
     const historyRef = this._databaseRef!.child("history").startAt(
       null,
@@ -291,6 +306,9 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     });
   }
 
+  /**
+   * Apply all pending changes in `history` node that aren't yet checked in into `checkpoint`, and then mark connection to be Ready.
+   */
   protected _handleInitialRevisions(): void {
     if (this._zombie) {
       // just in case we were cleaned up before we got the data.
@@ -336,6 +354,9 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     });
   }
 
+  /**
+   * Apply incoming changes from newly added child in `history` node of Firebase ref.
+   */
   protected _handlePendingReceivedRevisions(): void {
     const pending = this._pendingReceivedRevisions;
 
@@ -426,6 +447,12 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     this._doTransaction(revisionId, revisionData, callback);
   }
 
+  /**
+   * Perform Insert transaction Text Operation into given Revision ID in `history` node of Firebase ref.
+   * @param revisionId - Revision ID.
+   * @param revisionData - Text Operation and metadata in JSON format.
+   * @param callback - Success/Error callback handler.
+   */
   protected _doTransaction(
     revisionId: string,
     revisionData: FirebaseOperationDataType,
@@ -470,6 +497,10 @@ export class FirebaseAdapter implements IDatabaseAdapter {
       );
   }
 
+  /**
+   * Returns parsed Text Operation with metadata for given JSON representation of the same.
+   * @param data - Partial representation of the Text Operation in Firebase.
+   */
   protected _parseRevision(data: RevisionType): IRevision | null {
     // We could do some of this validation via security rules.  But it's nice to be robust, just in case.
     if (typeof data !== "object" || typeof data.o !== "object") {
@@ -494,6 +525,9 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     };
   }
 
+  /**
+   * Updates current document state into `checkpoint` node in Firebase.
+   */
   protected _saveCheckpoint(): void {
     this._databaseRef!.child("checkpoint").set({
       a: this._userId,
@@ -511,7 +545,7 @@ export class FirebaseAdapter implements IDatabaseAdapter {
   setUserId(userId: UserIDType): void {
     Utils.validateTruth(
       typeof userId === "string" || typeof userId === "number",
-      "User ID must be either String or Interger."
+      "User ID must be either String or Integer."
     );
 
     if (this._userRef) {
@@ -578,9 +612,13 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     this._userCursor = cursor;
   }
 
+  /**
+   * Callback listener for `child_added` and `child_changed` events on `users` node of Firebase ref.
+   * @param childSnap - JSON serializable data snapshot of the child.
+   */
   protected _childChanged(childSnap: firebase.database.DataSnapshot): void {
     if (this._zombie) {
-      // just in case we were cleaned up before we got the checkpoint data.
+      // just in case we were cleaned up before we got the users data.
       return;
     }
 
@@ -596,11 +634,18 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     );
   }
 
+  /**
+   * Callback listener for `child_removed` events on `users` node of Firebase ref.
+   * @param childSnap - JSON serializable data snapshot of the child.
+   */
   protected _childRemoved(childSnap: firebase.database.DataSnapshot): void {
     const userId = childSnap.key as string;
     this._trigger(FirebaseAdapterEvent.CursorChange, userId, null);
   }
 
+  /**
+   * Attach listeners for `child_added`, `child_changed` and `child_removed` event on `users` node of Firebase ref.
+   */
   protected _monitorCursors(): void {
     const usersRef = this._databaseRef!.child("users");
 
@@ -625,7 +670,7 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     ref.on(eventType, callback, context);
   }
 
-  protected removeFirebaseCallbacks() {
+  protected _removeFirebaseCallbacks() {
     for (const callbackRef of this._firebaseCallbacks) {
       const { ref, eventType, callback, context } = callbackRef;
       ref.off(eventType, callback, context);
@@ -634,6 +679,10 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     this._firebaseCallbacks = [];
   }
 
+  /**
+   * Returns Database key for `history` node based on current Revision index _(0-based)_.
+   * @param revision - Current Revision Index.
+   */
   protected _revisionToId(revision: number): string {
     if (revision === 0) {
       return "A0";
@@ -653,6 +702,10 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     return `${prefix}${str}`;
   }
 
+  /**
+   * Returns Revision Index _(0-based)_ based on Database key provided.
+   * @param revisionId - Database key for `history` node.
+   */
   protected _revisionFromId(revisionId: string): number {
     Utils.validateTruth(
       revisionId.length > 0 &&

@@ -586,15 +586,14 @@ export class MonacoAdapter implements IEditorAdapter {
 
   protected _onChange(
     ev: Pick<monaco.editor.IModelContentChangedEvent, "changes">
-  ): void {
-    const model = this._getModel()!;
-    const content = this._getPreviousContentInRange();
-    const contentLength = content.length;
-
-    /** Ignore if change is being applied by firepad itself. */
+  ): void {/** Ignore if change is being applied by firepad itself. */
     if (this._ignoreChanges) {
       return;
     }
+
+    const model = this._getModel()!;
+    const content = this._getPreviousContentInRange();
+    const contentLength = content.length;
 
     /** If no change information received */
     if (ev.changes?.length < 1) {

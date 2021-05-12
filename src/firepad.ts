@@ -126,10 +126,10 @@ export class Firepad implements IFirepad {
       FirepadEvent.CursorChange,
     ]);
 
-    this.init();
+    this._init();
   }
 
-  protected init(): void {
+  protected _init(): void {
     this._databaseAdapter.on(DatabaseAdapterEvent.CursorChange, (
       userId /**: UserIDType*/
     ) => {

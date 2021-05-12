@@ -28,7 +28,7 @@ const init = function (): void {
 
   // Create Monaco and firepad.
   const editor = monaco.editor.create(document.getElementById("firepad"), {
-    language: "javascript",
+    language: "typescript",
     fontSize: 18,
     theme: "vs-dark",
     // @ts-ignore
@@ -62,7 +62,7 @@ declare var module: NodeModule & {
 };
 
 if (module.hot) {
-  const onHotReload = function () {
+  const onHotReload = function (): void {
     console.clear();
     console.log("Changes detected, recreating Firepad!");
 

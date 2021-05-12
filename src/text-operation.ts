@@ -100,10 +100,10 @@ export interface ITextOperation {
    */
   shouldBeComposedWithInverted(other: ITextOperation): boolean;
   /**
-   * Tests whether Next operation can be chained with current one, i.e.,
+   * Tests whether next operation can be chained with current one, i.e.,
    * checks if the `targetLength` of current operation is equal with the `baseLength`
    * of next operation.
-   * @param other - Next Operation
+   * @param other - Subsequent Operation
    */
   canMergeWith(other: ITextOperation): boolean;
   /**

@@ -11,18 +11,22 @@ export interface IWrappedOperation extends ITextOperation {
    * Returns final state of Cursor
    */
   getCursor(): ICursor | null;
+  /**
+   * Returns a clone of Text Operation
+   */
+  getOperation(): ITextOperation;
 }
 
 export class WrappedOperation implements IWrappedOperation {
   protected readonly _operation: ITextOperation;
-  protected readonly _metadata: IOperationMeta | undefined;
+  protected readonly _metadata: IOperationMeta | null;
 
   /**
    * Wraps Text Operation with additional Operation Metadata.
    * @param operation - Text Operation to wrap.
    * @param metadata - Additional Operation Metadata (optional).
    */
-  constructor(operation: ITextOperation, metadata?: IOperationMeta) {
+  constructor(operation: ITextOperation, metadata: IOperationMeta | null = null) {
     this._operation = operation;
     this._metadata = metadata;
   }
@@ -41,6 +45,10 @@ export class WrappedOperation implements IWrappedOperation {
     }
 
     return this._metadata.getCursor();
+  }
+
+  getOperation(): ITextOperation {
+    return this._operation.clone();
   }
 
   equals(other: ITextOperation): boolean {
@@ -111,8 +119,8 @@ export class WrappedOperation implements IWrappedOperation {
   }
 
   protected _composeMeta(
-    otherMetadata: IOperationMeta | undefined
-  ): IOperationMeta | undefined {
+    otherMetadata: IOperationMeta | null
+  ): IOperationMeta | null {
     if (!this._metadata) {
       return otherMetadata;
     }

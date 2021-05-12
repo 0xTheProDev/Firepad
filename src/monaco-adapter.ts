@@ -24,8 +24,8 @@ interface IRemoteCursor {
 }
 
 interface ITextModelWithUndoRedo extends monaco.editor.ITextModel {
-  undo?: UndoRedoCallbackType;
-  redo?: UndoRedoCallbackType;
+  undo: UndoRedoCallbackType | null;
+  redo: UndoRedoCallbackType | null;
 }
 
 export class MonacoAdapter implements IEditorAdapter {
@@ -40,10 +40,10 @@ export class MonacoAdapter implements IEditorAdapter {
   protected _lastCursorRange: monaco.Selection | null;
   protected _emitter: IEventEmitter | null;
   protected _cursorTimeout: NodeJS.Timeout | null;
-  protected _undo: UndoRedoCallbackType | undefined;
-  protected _redo: UndoRedoCallbackType | undefined;
-  protected _originalUndo: UndoRedoCallbackType | undefined;
-  protected _originalRedo: UndoRedoCallbackType | undefined;
+  protected _undoCallback: UndoRedoCallbackType | null;
+  protected _redoCallback: UndoRedoCallbackType | null;
+  protected _originalUndo: UndoRedoCallbackType | null;
+  protected _originalRedo: UndoRedoCallbackType | null;
 
   /**
    * Wraps a monaco editor in adapter to work with rest of Firepad
@@ -62,10 +62,10 @@ export class MonacoAdapter implements IEditorAdapter {
     this._remoteCursors = new Map<ClientIDType, IRemoteCursor>();
     this._cursorWidgetController = new CursorWidgetController(this._monaco);
 
-    this._redo = undefined;
-    this._undo = undefined;
-    this._originalRedo = undefined;
-    this._originalUndo = undefined;
+    this._redoCallback = null;
+    this._undoCallback = null;
+    this._originalRedo = null;
+    this._originalUndo = null;
     this._cursorTimeout = null;
     this._ignoreChanges = false;
 
@@ -137,15 +137,15 @@ export class MonacoAdapter implements IEditorAdapter {
       model.redo = this._originalRedo;
     }
 
-    this._originalUndo = undefined;
-    this._originalRedo = undefined;
+    this._originalUndo = null;
+    this._originalRedo = null;
   }
 
   /**
    * Returns the Text Model associated with the Editor
    */
   protected _getModel(): ITextModelWithUndoRedo | null {
-    return this._monaco.getModel();
+    return this._monaco.getModel() as ITextModelWithUndoRedo;
   }
 
   registerUndo(callback: UndoRedoCallbackType): void {
@@ -156,7 +156,7 @@ export class MonacoAdapter implements IEditorAdapter {
     }
 
     this._originalUndo = model.undo;
-    model.undo = this._undo = callback;
+    model.undo = this._undoCallback = callback;
   }
 
   registerRedo(callback: UndoRedoCallbackType): void {
@@ -167,7 +167,7 @@ export class MonacoAdapter implements IEditorAdapter {
     }
 
     this._originalRedo = model.redo;
-    model.redo = this._redo = callback;
+    model.redo = this._redoCallback = callback;
   }
 
   on(
@@ -620,14 +620,14 @@ export class MonacoAdapter implements IEditorAdapter {
       return;
     }
 
-    if (this._undo) {
+    if (this._undoCallback) {
       this._originalUndo = newModel.undo;
-      newModel.undo = this._undo;
+      newModel.undo = this._undoCallback;
     }
 
-    if (this._originalRedo) {
+    if (this._redoCallback) {
       this._originalRedo = newModel.redo;
-      newModel.redo = this._redo;
+      newModel.redo = this._redoCallback;
     }
 
     const oldLinesCount = this._lastDocLines.length;

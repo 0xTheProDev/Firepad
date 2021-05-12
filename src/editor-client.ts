@@ -244,12 +244,13 @@ export class EditorClient extends Client implements IEditorClient {
     this._undoManager!.dispose();
   }
 
-  protected _applyUnredo(operation: IWrappedOperation) {
-    this._undoManager!.add(this._editorAdapter.invertOperation(operation));
+  protected _applyUnredo(wrappedOperation: IWrappedOperation) {
+    this._undoManager!.add(this._editorAdapter.invertOperation(wrappedOperation));
 
+    const operation = wrappedOperation.getOperation();
     this._editorAdapter.applyOperation(operation);
 
-    this._cursor = operation.getCursor();
+    this._cursor = wrappedOperation.getCursor();
     if (this._cursor) {
       this._editorAdapter.setCursor(this._cursor);
     }

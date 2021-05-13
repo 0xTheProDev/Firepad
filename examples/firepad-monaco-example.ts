@@ -66,7 +66,7 @@ if (module.hot) {
     console.clear();
     console.log("Changes detected, recreating Firepad!");
 
-    const Firepad = require("../src/index.ts").default;
+    const Firepad = require("../src/index.ts");
 
     // Get Editor and Firepad instance
     const editor: monaco.editor.IStandaloneCodeEditor = window["editor"];

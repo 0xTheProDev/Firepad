@@ -378,6 +378,8 @@ export class FirebaseAdapter implements IDatabaseAdapter {
           pending[revisionId]
         );
       } else {
+        console.log("Incoming:", revision.operation.toJSON());
+
         this._document = this._document!.compose(revision.operation);
 
         if (this._sent && revisionId === this._sent.id) {
@@ -458,6 +460,8 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     revisionData: FirebaseOperationDataType,
     callback: SendOperationCallbackType
   ): void {
+    console.log("Outgoing:", revisionData.o);
+
     this._databaseRef!.child("history")
       .child(revisionId)
       .transaction(

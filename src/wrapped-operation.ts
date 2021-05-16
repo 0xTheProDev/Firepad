@@ -26,7 +26,10 @@ export class WrappedOperation implements IWrappedOperation {
    * @param operation - Text Operation to wrap.
    * @param metadata - Additional Operation Metadata (optional).
    */
-  constructor(operation: ITextOperation, metadata: IOperationMeta | null = null) {
+  constructor(
+    operation: ITextOperation,
+    metadata: IOperationMeta | null = null
+  ) {
     this._operation = operation;
     this._metadata = metadata;
   }

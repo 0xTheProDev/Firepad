@@ -10,8 +10,6 @@ export enum EndOfLineSequence {
 
 class ValidationError extends Error {}
 
-class InheritanceError extends Error {}
-
 class NoopError extends Error {}
 
 class InvalidOperationError extends Error {}
@@ -106,12 +104,6 @@ export class Utils {
   static shouldNotGetCalled(err?: string): void {
     throw new NoopError(
       err || "This method should not get called or has no operation to perform"
-    );
-  }
-
-  static shouldImplementInChild(err?: string): void {
-    throw new InheritanceError(
-      err || "This method must be implemented in child class to be invoked"
     );
   }
 

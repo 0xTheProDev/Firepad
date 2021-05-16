@@ -1,7 +1,20 @@
 import { ITextOperation } from "./text-operation";
-import { Utils } from "./utils";
+import { IDisposable, Utils } from "./utils";
 
-export interface IClient {
+export interface IBaseClient {
+  /**
+   * Send operation to Database adapter.
+   * @param operation - Text Operation at client end.
+   */
+  sendOperation(operation: ITextOperation): void;
+  /**
+   * Apply operation to Editor adapter
+   * @param operation - Text Operation at Server end.
+   */
+  applyOperation(operation: ITextOperation): void;
+}
+
+export interface IClient extends IBaseClient, IDisposable {
   /**
    * Tests whether the Client is Synchronized with Server or not.
    */
@@ -32,16 +45,6 @@ export interface IClient {
    * Handle retry
    */
   serverRetry(): void;
-  /**
-   * Send operation to Database adapter.
-   * @param operation - Text Operation at client end.
-   */
-  sendOperation(operation: ITextOperation): void;
-  /**
-   * Apply operation to Editor adapter
-   * @param operation - Text Operation at Server end.
-   */
-  applyOperation(operation: ITextOperation): void;
 }
 
 export interface IClientSynchronizationState {
@@ -218,7 +221,18 @@ class AwaitingWithBuffer implements IClientSynchronizationState {
 }
 
 export class Client implements IClient {
-  protected _state: IClientSynchronizationState = _synchronized;
+  protected _operator: IBaseClient;
+  protected _state: IClientSynchronizationState;
+
+  constructor(operator: IBaseClient) {
+    this._operator = operator;
+    this._state = _synchronized;
+  }
+
+  dispose(): void {
+    this._operator = null;
+    this._setState(_synchronized);
+  }
 
   protected _setState(state: IClientSynchronizationState): void {
     this._state = state;
@@ -252,15 +266,11 @@ export class Client implements IClient {
     this._setState(this._state.serverRetry(this));
   }
 
-  sendOperation(operation_: ITextOperation): void {
-    Utils.shouldImplementInChild(
-      "sendOperation must be defined in child class"
-    );
+  sendOperation(operation: ITextOperation): void {
+    this._operator.sendOperation(operation);
   }
 
-  applyOperation(operation_: ITextOperation): void {
-    Utils.shouldImplementInChild(
-      "applyOperation must be defined in child class"
-    );
+  applyOperation(operation: ITextOperation): void {
+    this._operator.applyOperation(operation);
   }
 }

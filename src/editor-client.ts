@@ -1,4 +1,4 @@
-import { IClient, Client } from "./client";
+import { IBaseClient, IClient, Client } from "./client";
 import { ICursor, Cursor, CursorType } from "./cursor";
 import { IDatabaseAdapter } from "./database-adapter";
 import { IEditorAdapter } from "./editor-adapter";
@@ -24,7 +24,7 @@ interface ISyncCursor extends ICursor {
   synced?: boolean;
 }
 
-export interface IEditorClient extends IClient, IDisposable {
+export interface IEditorClient extends IBaseClient, IDisposable {
   /**
    * Add listener to Editor Client.
    * @param event - Event name.
@@ -49,10 +49,11 @@ export interface IEditorClient extends IClient, IDisposable {
   clearUndoRedoStack(): void;
 }
 
-export class EditorClient extends Client implements IEditorClient {
+export class EditorClient implements IEditorClient {
+  protected readonly _client: IClient;
   protected readonly _databaseAdapter: IDatabaseAdapter;
   protected readonly _editorAdapter: IEditorAdapter;
-  protected readonly _clients: Map<string, IRemoteClient>;
+  protected readonly _remoteClients: Map<string, IRemoteClient>;
 
   protected _focused: boolean;
   protected _cursor: ISyncCursor | null;
@@ -69,16 +70,15 @@ export class EditorClient extends Client implements IEditorClient {
     databaseAdapter: IDatabaseAdapter,
     editorAdapter: IEditorAdapter
   ) {
-    super();
-
     this._focused = false;
     this._cursor = null;
     this._sendCursorTimeout = null;
 
+    this._client = new Client(this);
     this._databaseAdapter = databaseAdapter;
     this._editorAdapter = editorAdapter;
     this._undoManager = new UndoManager();
-    this._clients = new Map<string, IRemoteClient>();
+    this._remoteClients = new Map<string, IRemoteClient>();
     this._emitter = new EventEmitter([
       EditorClientEvent.Error,
       EditorClientEvent.Undo,
@@ -118,16 +118,16 @@ export class EditorClient extends Client implements IEditorClient {
 
     this._databaseAdapter.registerCallbacks({
       ack: () => {
-        this.serverAck();
+        this._client.serverAck();
         this._updateCursor();
         this._sendCursor(this._cursor);
         this._emitStatus();
       },
       retry: () => {
-        this.serverRetry();
+        this._client.serverRetry();
       },
       operation: (operation: ITextOperation) => {
-        this.applyServer(operation);
+        this._client.applyServer(operation);
       },
       cursor: (
         clientId: string,
@@ -137,7 +137,7 @@ export class EditorClient extends Client implements IEditorClient {
       ) => {
         if (
           this._databaseAdapter.isCurrentUser(clientId) ||
-          !this.isSynchronized()
+          !this._client.isSynchronized()
         ) {
           return;
         }
@@ -181,7 +181,8 @@ export class EditorClient extends Client implements IEditorClient {
       this._undoManager = null;
     }
 
-    this._clients.clear();
+    this._client.dispose();
+    this._remoteClients.clear();
   }
 
   on(
@@ -208,19 +209,19 @@ export class EditorClient extends Client implements IEditorClient {
 
   protected _emitStatus() {
     setTimeout(() => {
-      this._trigger(EditorClientEvent.Synced, this.isSynchronized());
+      this._trigger(EditorClientEvent.Synced, this._client.isSynchronized());
     });
   }
 
   protected _getClientObject(clientId: string): IRemoteClient {
-    let client = this._clients.get(clientId);
+    let client = this._remoteClients.get(clientId);
 
     if (client) {
       return client;
     }
 
     client = new RemoteClient(clientId, this._editorAdapter);
-    this._clients.set(clientId, client);
+    this._remoteClients.set(clientId, client);
 
     return client;
   }
@@ -237,7 +238,7 @@ export class EditorClient extends Client implements IEditorClient {
 
     const inverseMeta = new OperationMeta(this._cursor, cursorBefore);
     this._undoManager!.add(new WrappedOperation(inverse, inverseMeta), compose);
-    this.applyClient(operation);
+    this._client.applyClient(operation);
   }
 
   clearUndoRedoStack(): void {
@@ -245,7 +246,9 @@ export class EditorClient extends Client implements IEditorClient {
   }
 
   protected _applyUnredo(wrappedOperation: IWrappedOperation) {
-    this._undoManager!.add(this._editorAdapter.invertOperation(wrappedOperation));
+    this._undoManager!.add(
+      this._editorAdapter.invertOperation(wrappedOperation)
+    );
 
     const operation = wrappedOperation.getOperation();
     this._editorAdapter.applyOperation(operation);
@@ -255,7 +258,7 @@ export class EditorClient extends Client implements IEditorClient {
       this._editorAdapter.setCursor(this._cursor);
     }
 
-    this.applyClient(operation);
+    this._client.applyClient(operation);
   }
 
   protected _undo() {
@@ -297,7 +300,7 @@ export class EditorClient extends Client implements IEditorClient {
       this._sendCursorTimeout = null;
     }
 
-    if (this.isAwaitingWithBuffer()) {
+    if (this._client.isAwaitingWithBuffer()) {
       this._sendCursorTimeout = setTimeout(() => {
         this._sendCursor(cursor);
       }, 3);

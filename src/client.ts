@@ -221,7 +221,7 @@ class AwaitingWithBuffer implements IClientSynchronizationState {
 }
 
 export class Client implements IClient {
-  protected _operator: IBaseClient;
+  protected _operator: IBaseClient | null;
   protected _state: IClientSynchronizationState;
 
   constructor(operator: IBaseClient) {
@@ -267,10 +267,14 @@ export class Client implements IClient {
   }
 
   sendOperation(operation: ITextOperation): void {
-    this._operator.sendOperation(operation);
+    Utils.validateFalse(this._operator == null, "sendOperation() is called after Client is disposed.")
+
+    this._operator!.sendOperation(operation);
   }
 
   applyOperation(operation: ITextOperation): void {
-    this._operator.applyOperation(operation);
+    Utils.validateFalse(this._operator == null, "applyOperation() is called after Client is disposed.")
+
+    this._operator!.applyOperation(operation);
   }
 }

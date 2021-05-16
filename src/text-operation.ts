@@ -458,6 +458,13 @@ export class TextOperation implements ITextOperation {
     return inverse;
   }
 
+  protected static _nextTextOp(
+    opIterator: IterableIterator<[number, ITextOp]>
+  ): ITextOp | null {
+    const opIteratorResult = opIterator.next().value;
+    return opIteratorResult ? opIteratorResult[1] : null;
+  }
+
   compose(otherOperation: TextOperation): ITextOperation {
     Utils.validateEquality(
       this._targetLength,
@@ -467,138 +474,120 @@ export class TextOperation implements ITextOperation {
 
     const operation = new TextOperation();
 
-    const opIterator1 = this.clone()._ops[Symbol.iterator]();
-    const opIterator2 = otherOperation.clone()._ops[Symbol.iterator]();
+    const opIterator1 = this._ops.entries();
+    const opIterator2 = otherOperation._ops.entries();
 
-    let opIteratorResult1 = opIterator1.next();
-    let opIteratorResult2 = opIterator2.next();
-
-    let op1: ITextOp | undefined = opIteratorResult1.value;
-    let op2: ITextOp | undefined = opIteratorResult2.value;
+    let op1: ITextOp | null = TextOperation._nextTextOp(opIterator1);
+    let op2: ITextOp | null = TextOperation._nextTextOp(opIterator2);
 
     while (true) {
       // Dispatch on the type of op1 and op2
-      if (opIteratorResult1.done && opIteratorResult2.done) {
+      if (op1 == null && op2 == null) {
         // end condition: both ops1 and ops2 have been processed
         break;
       }
 
       if (op1 && op1.isDelete()) {
         operation.delete(op1.chars!);
-
-        opIteratorResult1 = opIterator1.next();
-        op1 = opIteratorResult1.value;
+        op1 = TextOperation._nextTextOp(opIterator1);
         continue;
       }
 
       if (op2 && op2.isInsert()) {
         operation.insert(op2.text!, op2.attributes);
-
-        opIteratorResult2 = opIterator2.next();
-        op2 = opIteratorResult2.value;
+        op2 = TextOperation._nextTextOp(opIterator2);
         continue;
       }
 
       Utils.validateFalse(
-        opIteratorResult1.done,
+        op1 == null,
         "Cannot compose operations: first operation is too short."
       );
       Utils.validateFalse(
-        opIteratorResult2.done,
+        op2 == null,
         "Cannot compose operations: first operation is too long."
       );
 
-      if (op1!.isRetain() && op2!.isRetain()) {
+      if (op1 == null || op2 == null) {
+        /** Above guard rules will throw error anyway, this unreachable code is to provide type support of subequent operations. */
+        break;
+      }
+
+      if (op1.isRetain() && op2.isRetain()) {
         const attributes = this._composeAttributes(
-          op1!.attributes,
-          op2!.attributes,
+          op1.attributes,
+          op2.attributes,
           false
         );
 
-        if (op1!.chars! > op2!.chars!) {
-          operation.retain(op2!.chars!, attributes);
-          op1!.chars! -= op2!.chars!;
+        if (op1.chars! > op2.chars!) {
+          operation.retain(op2.chars!, attributes);
+          op1.chars! -= op2.chars!;
 
-          opIteratorResult2 = opIterator2.next();
-          op2 = opIteratorResult2.value;
-        } else if (op1!.chars === op2!.chars) {
-          operation.retain(op1!.chars!, attributes);
+          op2 = TextOperation._nextTextOp(opIterator2);
+        } else if (op1.chars === op2.chars) {
+          operation.retain(op1.chars!, attributes);
 
-          opIteratorResult1 = opIterator1.next();
-          opIteratorResult2 = opIterator2.next();
-          op1 = opIteratorResult1.value;
-          op2 = opIteratorResult2.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
+          op2 = TextOperation._nextTextOp(opIterator2);
         } else {
-          operation.retain(op1!.chars!, attributes);
-          op2!.chars! -= op1!.chars!;
+          operation.retain(op1.chars!, attributes);
+          op2.chars! -= op1.chars!;
 
-          opIteratorResult1 = opIterator1.next();
-          op1 = opIteratorResult1.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
         }
       } else if (op1!.isInsert() && op2!.isDelete()) {
-        if (op1!.text!.length > op2!.chars!) {
-          op1!.text = op1!.text!.slice(op2!.chars!);
+        if (op1.text!.length > op2.chars!) {
+          op1.text = op1.text!.slice(op2.chars!);
 
-          opIteratorResult2 = opIterator2.next();
-          op2 = opIteratorResult2.value;
-        } else if (op1!.text!.length === op2!.chars) {
-          opIteratorResult1 = opIterator1.next();
-          opIteratorResult2 = opIterator2.next();
-          op1 = opIteratorResult1.value;
-          op2 = opIteratorResult2.value;
+          op2 = TextOperation._nextTextOp(opIterator2);
+        } else if (op1.text!.length === op2.chars) {
+          op1 = TextOperation._nextTextOp(opIterator1);
+          op2 = TextOperation._nextTextOp(opIterator2);
         } else {
-          op2!.chars! -= op1!.text!.length;
+          op2.chars! -= op1.text!.length;
 
-          opIteratorResult1 = opIterator1.next();
-          op1 = opIteratorResult1.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
         }
-      } else if (op1!.isInsert() && op2!.isRetain()) {
+      } else if (op1.isInsert() && op2.isRetain()) {
         const attributes = this._composeAttributes(
-          op1!.attributes,
-          op2!.attributes,
+          op1.attributes,
+          op2.attributes,
           true
         );
 
-        if (op1!.text!.length > op2!.chars!) {
-          operation.insert(op1!.text!.slice(0, op2!.chars!), attributes);
-          op1!.text = op1!.text!.slice(op2!.chars!);
+        if (op1.text!.length > op2.chars!) {
+          operation.insert(op1.text!.slice(0, op2.chars!), attributes);
+          op1.text = op1.text!.slice(op2.chars!);
 
-          opIteratorResult2 = opIterator2.next();
-          op2 = opIteratorResult2.value;
-        } else if (op1!.text!.length === op2!.chars) {
-          operation.insert(op1!.text!, attributes);
+          op2 = TextOperation._nextTextOp(opIterator2);
+        } else if (op1.text!.length === op2.chars) {
+          operation.insert(op1.text!, attributes);
 
-          opIteratorResult1 = opIterator1.next();
-          opIteratorResult2 = opIterator2.next();
-          op1 = opIteratorResult1.value;
-          op2 = opIteratorResult2.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
+          op2 = TextOperation._nextTextOp(opIterator2);
         } else {
-          operation.insert(op1!.text!, attributes);
-          op2!.chars! -= op1!.text!.length;
+          operation.insert(op1.text!, attributes);
+          op2.chars! -= op1.text!.length;
 
-          opIteratorResult1 = opIterator1.next();
-          op1 = opIteratorResult1.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
         }
-      } else if (op1!.isRetain() && op2!.isDelete()) {
-        if (op1!.chars! > op2!.chars!) {
-          operation.delete(op2!.chars!);
-          op1!.chars! -= op2!.chars!;
+      } else if (op1.isRetain() && op2.isDelete()) {
+        if (op1.chars! > op2.chars!) {
+          operation.delete(op2.chars!);
+          op1.chars! -= op2.chars!;
 
-          opIteratorResult2 = opIterator2.next();
-          op2 = opIteratorResult2.value;
-        } else if (op1!.chars === op2!.chars) {
-          operation.delete(op2!.chars!);
+          op2 = TextOperation._nextTextOp(opIterator2);
+        } else if (op1.chars === op2.chars) {
+          operation.delete(op2.chars!);
 
-          opIteratorResult1 = opIterator1.next();
-          opIteratorResult2 = opIterator2.next();
-          op1 = opIteratorResult1.value;
-          op2 = opIteratorResult2.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
+          op2 = TextOperation._nextTextOp(opIterator2);
         } else {
-          operation.delete(op1!.chars!);
-          op2!.chars! -= op1!.chars!;
+          operation.delete(op1.chars!);
+          op2.chars! -= op1.chars!;
 
-          opIteratorResult1 = opIterator1.next();
-          op1 = opIteratorResult1.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
         }
       } else {
         Utils.shouldNotBeComposedOrApplied(
@@ -793,20 +782,17 @@ export class TextOperation implements ITextOperation {
     const operation1prime = new TextOperation();
     const operation2prime = new TextOperation();
 
-    const opIterator1 = operation1.clone().getOps()[Symbol.iterator]();
-    const opIterator2 = operation2.clone().getOps()[Symbol.iterator]();
+    const opIterator1 = operation1.getOps().entries();
+    const opIterator2 = operation2.getOps().entries();
 
-    let opIteratorResult1 = opIterator1.next();
-    let opIteratorResult2 = opIterator2.next();
-
-    let op1: ITextOp | undefined = opIteratorResult1.value;
-    let op2: ITextOp | undefined = opIteratorResult2.value;
+    let op1: ITextOp | null = TextOperation._nextTextOp(opIterator1);
+    let op2: ITextOp | null = TextOperation._nextTextOp(opIterator1);
 
     while (true) {
       // At every iteration of the loop, the imaginary cursor that both
       // operation1 and operation2 have that operates on the input string must
       // have the same position in the input string.
-      if (opIteratorResult1.done && opIteratorResult2.done) {
+      if (op1 == null && op2 == null) {
         // end condition: both ops1 and ops2 have been processed
         break;
       }
@@ -817,128 +803,113 @@ export class TextOperation implements ITextOperation {
       if (op1 && op1.isInsert()) {
         operation1prime.insert(op1.text!, op1.attributes);
         operation2prime.retain(op1.text!.length, op1.attributes);
-
-        opIteratorResult1 = opIterator1.next();
-        op1 = opIteratorResult1.value;
+        op1 = TextOperation._nextTextOp(opIterator1);
         continue;
       }
 
       if (op2 && op2.isInsert()) {
         operation1prime.retain(op2.text!.length, op2.attributes);
         operation2prime.insert(op2.text!, op2.attributes);
-
-        opIteratorResult2 = opIterator2.next();
-        op2 = opIteratorResult2.value;
+        op2 = TextOperation._nextTextOp(opIterator2);
         continue;
       }
 
       Utils.validateFalse(
-        opIteratorResult1.done,
+        op1 == null,
         "Cannot transform operations: first operation is too short."
       );
       Utils.validateFalse(
-        opIteratorResult2.done,
+        op2 == null,
         "Cannot transform operations: first operation is too long."
       );
 
-      if (op1!.isRetain() && op2!.isRetain()) {
+      if (op1 == null || op2 == null) {
+        /** Above guard rules will throw error anyway, this unreachable code is to provide type support of subequent operations. */
+        break;
+      }
+
+      if (op1.isRetain() && op2.isRetain()) {
         // Simple case: retain/retain
         let cursorPosition: number = 0;
         const attributesPrime = TextOperation.transformAttributes(
-          op1!.attributes,
-          op2!.attributes
+          op1.attributes,
+          op2.attributes
         );
 
-        if (op1!.chars! > op2!.chars!) {
-          cursorPosition = op2!.chars!;
-          op1!.chars! -= op2!.chars!;
+        if (op1.chars! > op2.chars!) {
+          cursorPosition = op2.chars!;
+          op1.chars! -= op2.chars!;
 
-          opIteratorResult2 = opIterator2.next();
-          op2 = opIteratorResult2.value;
-        } else if (op1!.chars === op2!.chars) {
-          cursorPosition = op2!.chars!;
+          op2 = TextOperation._nextTextOp(opIterator2);
+        } else if (op1.chars === op2.chars) {
+          cursorPosition = op2.chars!;
 
-          opIteratorResult1 = opIterator1.next();
-          opIteratorResult2 = opIterator2.next();
-          op1 = opIteratorResult1.value;
-          op2 = opIteratorResult2.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
+          op2 = TextOperation._nextTextOp(opIterator2);
         } else {
-          cursorPosition = op1!.chars!;
-          op2!.chars! -= op1!.chars!;
+          cursorPosition = op1.chars!;
+          op2.chars! -= op1.chars!;
 
-          opIteratorResult1 = opIterator1.next();
-          op1 = opIteratorResult1.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
         }
 
         operation1prime.retain(cursorPosition, attributesPrime[0]);
         operation2prime.retain(cursorPosition, attributesPrime[1]);
-      } else if (op1!.isDelete() && op2!.isDelete()) {
+      } else if (op1.isDelete() && op2.isDelete()) {
         // Both operations delete the same string at the same position. We don't
         // need to produce any operations, we just skip over the delete ops and
         // handle the case that one operation deletes more than the other.
-        if (op1!.chars! > op2!.chars!) {
-          op1!.chars! -= op2!.chars!;
+        if (op1.chars! > op2.chars!) {
+          op1.chars! -= op2.chars!;
 
-          opIteratorResult2 = opIterator2.next();
-          op2 = opIteratorResult2.value;
-        } else if (op1!.chars === op2!.chars) {
-          opIteratorResult1 = opIterator1.next();
-          opIteratorResult2 = opIterator2.next();
-          op1 = opIteratorResult1.value;
-          op2 = opIteratorResult2.value;
+          op2 = TextOperation._nextTextOp(opIterator2);
+        } else if (op1.chars === op2.chars) {
+          op1 = TextOperation._nextTextOp(opIterator1);
+          op2 = TextOperation._nextTextOp(opIterator2);
         } else {
-          op2!.chars! -= op1!.chars!;
+          op2.chars! -= op1.chars!;
 
-          opIteratorResult1 = opIterator1.next();
-          op1 = opIteratorResult1.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
         }
-      } else if (op1!.isDelete() && op2!.isRetain()) {
+      } else if (op1.isDelete() && op2.isRetain()) {
         let cursorPosition: number = 0;
 
-        if (op1!.chars! > op2!.chars!) {
-          cursorPosition = op2!.chars!;
-          op1!.chars! -= op2!.chars!;
+        if (op1.chars! > op2.chars!) {
+          cursorPosition = op2.chars!;
+          op1.chars! -= op2.chars!;
 
-          opIteratorResult2 = opIterator2.next();
-          op2 = opIteratorResult2.value;
-        } else if (op1!.chars === op2!.chars) {
-          cursorPosition = op2!.chars!;
+          op2 = TextOperation._nextTextOp(opIterator2);
+        } else if (op1.chars === op2.chars) {
+          cursorPosition = op2.chars!;
 
-          opIteratorResult1 = opIterator1.next();
-          opIteratorResult2 = opIterator2.next();
-          op1 = opIteratorResult1.value;
-          op2 = opIteratorResult2.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
+          op2 = TextOperation._nextTextOp(opIterator2);
         } else {
-          cursorPosition = op1!.chars!;
-          op2!.chars! -= op1!.chars!;
+          cursorPosition = op1.chars!;
+          op2.chars! -= op1.chars!;
 
-          opIteratorResult1 = opIterator1.next();
-          op1 = opIteratorResult1.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
         }
 
         operation1prime.delete(cursorPosition);
-      } else if (op1!.isRetain() && op2!.isDelete()) {
+      } else if (op1.isRetain() && op2.isDelete()) {
         let cursorPosition: number = 0;
 
-        if (op1!.chars! > op2!.chars!) {
-          cursorPosition = op2!.chars!;
-          op1!.chars! -= op2!.chars!;
+        if (op1.chars! > op2.chars!) {
+          cursorPosition = op2.chars!;
+          op1.chars! -= op2.chars!;
 
-          opIteratorResult2 = opIterator2.next();
-          op2 = opIteratorResult2.value;
-        } else if (op1!.chars === op2!.chars) {
-          cursorPosition = op1!.chars!;
+          op2 = TextOperation._nextTextOp(opIterator2);
+        } else if (op1.chars === op2.chars) {
+          cursorPosition = op1.chars!;
 
-          opIteratorResult1 = opIterator1.next();
-          opIteratorResult2 = opIterator2.next();
-          op1 = opIteratorResult1.value;
-          op2 = opIteratorResult2.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
+          op2 = TextOperation._nextTextOp(opIterator2);
         } else {
-          cursorPosition = op1!.chars!;
-          op2!.chars! -= op1!.chars!;
+          cursorPosition = op1.chars!;
+          op2.chars! -= op1.chars!;
 
-          opIteratorResult1 = opIterator1.next();
-          op1 = opIteratorResult1.value;
+          op1 = TextOperation._nextTextOp(opIterator1);
         }
 
         operation2prime.delete(cursorPosition);

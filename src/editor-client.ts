@@ -19,11 +19,6 @@ export enum EditorClientEvent {
 
 interface IEditorClientEvent extends IEvent {}
 
-interface ISyncCursor extends ICursor {
-  /** If the Cursor is synced will all remote users. Default: false */
-  synced?: boolean;
-}
-
 export interface IEditorClient extends IBaseClient, IDisposable {
   /**
    * Add listener to Editor Client.
@@ -56,7 +51,7 @@ export class EditorClient implements IEditorClient {
   protected readonly _remoteClients: Map<string, IRemoteClient>;
 
   protected _focused: boolean;
-  protected _cursor: ISyncCursor | null;
+  protected _cursor: ICursor | null;
   protected _emitter: IEventEmitter | null;
   protected _undoManager: IUndoManager | null;
   protected _sendCursorTimeout: NodeJS.Timeout | null;

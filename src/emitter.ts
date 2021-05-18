@@ -7,7 +7,7 @@ export type EventListener<E> = (eventArgs: E, ...extraArgs: any[]) => void;
 export interface IEvent {}
 
 export interface IEventListener<E, C> {
-  context: ThisType<C>;
+  context: ThisType<C> | null;
   callback: EventListener<E>;
 }
 
@@ -63,7 +63,7 @@ export class EventEmitter<E = IEvent, C = {}>
     this._eventListeners[event] ||= [];
     this._eventListeners[event].push({
       callback: listener,
-      context: context || this,
+      context: context || null,
     });
   }
 

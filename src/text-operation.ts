@@ -474,8 +474,8 @@ export class TextOperation implements ITextOperation {
 
     const operation = new TextOperation();
 
-    const opIterator1 = this._ops.entries();
-    const opIterator2 = otherOperation._ops.entries();
+    const opIterator1 = this.clone().getOps().entries();
+    const opIterator2 = otherOperation.clone().getOps().entries();
 
     let op1: ITextOp | null = TextOperation._nextTextOp(opIterator1);
     let op2: ITextOp | null = TextOperation._nextTextOp(opIterator2);
@@ -536,7 +536,10 @@ export class TextOperation implements ITextOperation {
 
           op1 = TextOperation._nextTextOp(opIterator1);
         }
-      } else if (op1!.isInsert() && op2!.isDelete()) {
+        continue;
+      }
+
+      if (op1!.isInsert() && op2!.isDelete()) {
         if (op1.text!.length > op2.chars!) {
           op1.text = op1.text!.slice(op2.chars!);
 
@@ -549,7 +552,10 @@ export class TextOperation implements ITextOperation {
 
           op1 = TextOperation._nextTextOp(opIterator1);
         }
-      } else if (op1.isInsert() && op2.isRetain()) {
+        continue;
+      }
+
+      if (op1.isInsert() && op2.isRetain()) {
         const attributes = this._composeAttributes(
           op1.attributes,
           op2.attributes,
@@ -572,7 +578,10 @@ export class TextOperation implements ITextOperation {
 
           op1 = TextOperation._nextTextOp(opIterator1);
         }
-      } else if (op1.isRetain() && op2.isDelete()) {
+        continue;
+      }
+
+      if (op1.isRetain() && op2.isDelete()) {
         if (op1.chars! > op2.chars!) {
           operation.delete(op2.chars!);
           op1.chars! -= op2.chars!;
@@ -589,11 +598,12 @@ export class TextOperation implements ITextOperation {
 
           op1 = TextOperation._nextTextOp(opIterator1);
         }
-      } else {
-        Utils.shouldNotBeComposedOrApplied(
-          `This should not happen:\nop1: ${op1}\nop2: ${op2}`
-        );
+        continue;
       }
+
+      Utils.shouldNotBeComposedOrApplied(
+        `This should not happen:\nop1: ${op1}\nop2: ${op2}`
+      );
     }
 
     return operation;
@@ -772,7 +782,7 @@ export class TextOperation implements ITextOperation {
   static transform(
     operation1: TextOperation,
     operation2: TextOperation
-  ): [ITextOperation, ITextOperation] {
+  ): [TextOperation, TextOperation] {
     Utils.validateEquality(
       operation1._baseLength,
       operation2._baseLength,
@@ -782,11 +792,11 @@ export class TextOperation implements ITextOperation {
     const operation1prime = new TextOperation();
     const operation2prime = new TextOperation();
 
-    const opIterator1 = operation1.getOps().entries();
-    const opIterator2 = operation2.getOps().entries();
+    const opIterator1 = operation1.clone().getOps().entries();
+    const opIterator2 = operation2.clone().getOps().entries();
 
     let op1: ITextOp | null = TextOperation._nextTextOp(opIterator1);
-    let op2: ITextOp | null = TextOperation._nextTextOp(opIterator1);
+    let op2: ITextOp | null = TextOperation._nextTextOp(opIterator2);
 
     while (true) {
       // At every iteration of the loop, the imaginary cursor that both
@@ -855,7 +865,10 @@ export class TextOperation implements ITextOperation {
 
         operation1prime.retain(cursorPosition, attributesPrime[0]);
         operation2prime.retain(cursorPosition, attributesPrime[1]);
-      } else if (op1.isDelete() && op2.isDelete()) {
+        continue;
+      }
+
+      if (op1.isDelete() && op2.isDelete()) {
         // Both operations delete the same string at the same position. We don't
         // need to produce any operations, we just skip over the delete ops and
         // handle the case that one operation deletes more than the other.
@@ -871,7 +884,10 @@ export class TextOperation implements ITextOperation {
 
           op1 = TextOperation._nextTextOp(opIterator1);
         }
-      } else if (op1.isDelete() && op2.isRetain()) {
+        continue;
+      }
+
+      if (op1.isDelete() && op2.isRetain()) {
         let cursorPosition: number = 0;
 
         if (op1.chars! > op2.chars!) {
@@ -892,7 +908,10 @@ export class TextOperation implements ITextOperation {
         }
 
         operation1prime.delete(cursorPosition);
-      } else if (op1.isRetain() && op2.isDelete()) {
+        continue;
+      }
+
+      if (op1.isRetain() && op2.isDelete()) {
         let cursorPosition: number = 0;
 
         if (op1.chars! > op2.chars!) {
@@ -913,11 +932,12 @@ export class TextOperation implements ITextOperation {
         }
 
         operation2prime.delete(cursorPosition);
-      } else {
-        Utils.shouldNotBeComposedOrApplied(
-          `The two operations aren't compatible:\nop1: ${op1}\nop2: ${op2}`
-        );
+        continue;
       }
+
+      Utils.shouldNotBeComposedOrApplied(
+        `The two operations aren't compatible:\nop1: ${op1}\nop2: ${op2}`
+      );
     }
 
     return [operation1prime, operation2prime];

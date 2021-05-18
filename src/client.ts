@@ -14,7 +14,7 @@ export interface IBaseClient {
   applyOperation(operation: ITextOperation): void;
 }
 
-export interface IClient extends IBaseClient, IDisposable {
+interface IClientStateMachine {
   /**
    * Tests whether the Client is Synchronized with Server or not.
    */
@@ -27,6 +27,9 @@ export interface IClient extends IBaseClient, IDisposable {
    * Tests whether the Client is Waiting for Acknowledgement with Server along with pending Operation or not.
    */
   isAwaitingWithBuffer(): boolean;
+}
+
+export interface IClient extends IBaseClient, IClientStateMachine, IDisposable {
   /**
    * Send operation to remote users.
    * @param operation - Text Operation from Editor Adapter
@@ -47,7 +50,7 @@ export interface IClient extends IBaseClient, IDisposable {
   serverRetry(): void;
 }
 
-export interface IClientSynchronizationState {
+interface IClientSynchronizationState extends IClientStateMachine {
   applyClient(
     client: IClient,
     operation: ITextOperation
@@ -66,6 +69,18 @@ export interface IClientSynchronizationState {
  */
 class Synchronized implements IClientSynchronizationState {
   constructor() {}
+
+  isSynchronized(): boolean {
+    return true;
+  }
+
+  isAwaitingConfirm(): boolean {
+    return false;
+  }
+
+  isAwaitingWithBuffer(): boolean {
+    return false;
+  }
 
   applyClient(
     client: IClient,
@@ -111,6 +126,18 @@ class AwaitingConfirm implements IClientSynchronizationState {
   constructor(outstanding: ITextOperation) {
     // Save the pending operation
     this._outstanding = outstanding;
+  }
+
+  isSynchronized(): boolean {
+    return false;
+  }
+
+  isAwaitingConfirm(): boolean {
+    return true;
+  }
+
+  isAwaitingWithBuffer(): boolean {
+    return false;
   }
 
   applyClient(
@@ -166,6 +193,18 @@ class AwaitingWithBuffer implements IClientSynchronizationState {
     // Save the pending operation and the user's edits since then
     this._outstanding = outstanding;
     this._buffer = buffer;
+  }
+
+  isSynchronized(): boolean {
+    return false;
+  }
+
+  isAwaitingConfirm(): boolean {
+    return false;
+  }
+
+  isAwaitingWithBuffer(): boolean {
+    return true;
   }
 
   applyClient(
@@ -231,7 +270,6 @@ export class Client implements IClient {
 
   dispose(): void {
     this._operator = null;
-    this._setState(_synchronized);
   }
 
   protected _setState(state: IClientSynchronizationState): void {
@@ -239,15 +277,15 @@ export class Client implements IClient {
   }
 
   isSynchronized(): boolean {
-    return this._state === _synchronized;
+    return this._state.isSynchronized();
   }
 
   isAwaitingConfirm(): boolean {
-    return this._state instanceof AwaitingConfirm;
+    return this._state.isAwaitingConfirm();
   }
 
   isAwaitingWithBuffer(): boolean {
-    return this._state instanceof AwaitingWithBuffer;
+    return this._state.isAwaitingWithBuffer();
   }
 
   applyClient(operation: ITextOperation): void {
@@ -267,13 +305,19 @@ export class Client implements IClient {
   }
 
   sendOperation(operation: ITextOperation): void {
-    Utils.validateFalse(this._operator == null, "sendOperation() is called after Client is disposed.")
+    Utils.validateFalse(
+      this._operator == null,
+      "sendOperation() is called after Client is disposed."
+    );
 
     this._operator!.sendOperation(operation);
   }
 
   applyOperation(operation: ITextOperation): void {
-    Utils.validateFalse(this._operator == null, "applyOperation() is called after Client is disposed.")
+    Utils.validateFalse(
+      this._operator == null,
+      "applyOperation() is called after Client is disposed."
+    );
 
     this._operator!.applyOperation(operation);
   }

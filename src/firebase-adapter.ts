@@ -17,7 +17,7 @@ import {
   TextOperationType,
 } from "./text-operation";
 import { ICursor, CursorType } from "./cursor";
-import { Utils } from "./utils";
+import * as Utils from "./utils";
 
 type FirebaseRefCallbackType = (
   snapshot: firebase.database.DataSnapshot

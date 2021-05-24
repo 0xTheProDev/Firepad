@@ -1,5 +1,5 @@
 import { ITextOp, TextOp, ITextOpAttributes, TextOptType } from "./text-op";
-import { Utils } from "./utils";
+import * as Utils from "./utils";
 
 /**
  * JSON Representation of a Text Operation
@@ -365,7 +365,7 @@ export class TextOperation implements ITextOperation {
       if (op.isRetain()) {
         const nextCursorPosition = cursorPosition + op.chars!;
 
-        Utils.validateLessThanOrEqual(
+        Utils.validateLessOrEqual(
           nextCursorPosition,
           prevContent.length,
           "Operation can't retain more characters than are left in the string."

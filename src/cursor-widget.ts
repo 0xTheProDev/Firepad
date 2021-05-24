@@ -9,7 +9,9 @@
 
 import * as monaco from "monaco-editor";
 import { ClientIDType } from "./editor-adapter";
-import { IDisposable, Utils } from "./utils";
+import * as Utils from "./utils";
+
+type OnDisposed = Utils.VoidFunctionType;
 
 export interface ICursorWidgetConstructorOptions {
   codeEditor: monaco.editor.ICodeEditor;
@@ -18,12 +20,13 @@ export interface ICursorWidgetConstructorOptions {
   label: string;
   range: monaco.Range;
   tooltipDuration?: number;
+  opacity?: string;
   onDisposed: OnDisposed;
 }
 
 export interface ICursorWidget
   extends monaco.editor.IContentWidget,
-    IDisposable {
+  Utils.IDisposable {
   /**
    * Update Widget position according to the Cursor position.
    * @param range - Current Position of the Cursor.
@@ -41,32 +44,28 @@ export interface ICursorWidget
   isDisposed(): boolean;
 }
 
-type OnDisposed = () => void;
-
 /**
  * This class implements a Monaco Content Widget to render a remote user's
  * name in a tooltip.
- *
- * @internal
  */
-export class CursorWidget
-  implements monaco.editor.IContentWidget, IDisposable, ICursorWidget {
+export class CursorWidget implements ICursorWidget {
   protected readonly _id: string;
   protected readonly _editor: monaco.editor.ICodeEditor;
   protected readonly _domNode: HTMLElement;
   protected readonly _tooltipDuration: number;
-  protected readonly _scrollListener: IDisposable | null;
+  protected readonly _scrollListener: monaco.IDisposable | null;
   protected readonly _onDisposed: OnDisposed;
 
   protected _tooltipNode: HTMLElement;
   protected _color: string;
   protected _content: string;
+  protected _opacity: string;
   protected _position: monaco.editor.IContentWidgetPosition | null;
   protected _hideTimer: any;
   protected _disposed: boolean;
 
   static readonly WIDGET_NODE_CLASSNAME = "firepad-remote-cursor";
-  static readonly MESSAGE_NODE_CLASSNAME = "firepad-remote-cursor-message";
+  static readonly TOOLTIP_NODE_CLASSNAME = "firepad-remote-cursor-message";
 
   constructor({
     codeEditor,
@@ -75,6 +74,7 @@ export class CursorWidget
     label,
     range,
     tooltipDuration = 1000,
+    opacity = "1.0",
     onDisposed,
   }: ICursorWidgetConstructorOptions) {
     this._editor = codeEditor;
@@ -83,6 +83,7 @@ export class CursorWidget
     this._onDisposed = onDisposed;
     this._color = color;
     this._content = label;
+    this._opacity = opacity;
 
     this._domNode = this._createWidgetNode();
 
@@ -183,9 +184,9 @@ export class CursorWidget
 
   protected _setTooltipVisible(visible: boolean): void {
     if (visible) {
-      this._tooltipNode.style.opacity = "1.0";
+      this._tooltipNode.style.display = "block";
     } else {
-      this._tooltipNode.style.opacity = "0";
+      this._tooltipNode.style.display = "none";
     }
   }
 
@@ -194,25 +195,35 @@ export class CursorWidget
     return `var(${varName}, ${this._color})`;
   }
 
-  protected _createMessageNode(): HTMLElement {
-    const messageNode = document.createElement("div");
+  protected _getTextColor(): string {
+    const rgb = Utils.hexToRgb(this._color);
+    const brightness = Math.round(
+      (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000
+    );
 
-    messageNode.style.borderColor = this._colorWithCSSVars("border");
-    messageNode.style.backgroundColor = this._colorWithCSSVars("bg");
-    messageNode.style.color = Utils.getTextColor(this._color);
-    messageNode.style.borderRadius = "2px";
-    messageNode.style.fontSize = "12px";
-    messageNode.style.padding = "2px 8px";
-    messageNode.style.whiteSpace = "nowrap";
+    return brightness >= 125 ? "#000000" : "#ffffff";
+  }
 
-    messageNode.textContent = this._content;
+  protected _createTooltipNode(): HTMLElement {
+    const tooltipNode = document.createElement("div");
+
+    tooltipNode.style.borderColor = this._colorWithCSSVars("border");
+    tooltipNode.style.backgroundColor = this._colorWithCSSVars("bg");
+    tooltipNode.style.color = this._getTextColor();
+    tooltipNode.style.opacity = this._opacity;
+    tooltipNode.style.borderRadius = "2px";
+    tooltipNode.style.fontSize = "12px";
+    tooltipNode.style.padding = "2px 8px";
+    tooltipNode.style.whiteSpace = "nowrap";
+
+    tooltipNode.textContent = this._content;
 
     const className = `${
-      CursorWidget.MESSAGE_NODE_CLASSNAME
+      CursorWidget.TOOLTIP_NODE_CLASSNAME
     }-${this._color.replace("#", "")}`;
-    messageNode.classList.add(className, CursorWidget.MESSAGE_NODE_CLASSNAME);
+    tooltipNode.classList.add(className, CursorWidget.TOOLTIP_NODE_CLASSNAME);
 
-    return messageNode;
+    return tooltipNode;
   }
 
   protected _createWidgetNode(): HTMLElement {
@@ -223,7 +234,7 @@ export class CursorWidget
     widgetNode.style.paddingBottom = "0px";
     widgetNode.style.transition = "all 0.1s linear";
 
-    this._tooltipNode = this._createMessageNode();
+    this._tooltipNode = this._createTooltipNode();
     widgetNode.appendChild(this._tooltipNode);
 
     widgetNode.classList.add(

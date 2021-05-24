@@ -1,5 +1,5 @@
 import { ITextOperation } from "./text-operation";
-import { IDisposable, Utils } from "./utils";
+import * as Utils from "./utils";
 
 export interface IBaseClient {
   /**
@@ -29,7 +29,7 @@ interface IClientStateMachine {
   isAwaitingWithBuffer(): boolean;
 }
 
-export interface IClient extends IBaseClient, IClientStateMachine, IDisposable {
+export interface IClient extends IBaseClient, IClientStateMachine, Utils.IDisposable {
   /**
    * Send operation to remote users.
    * @param operation - Text Operation from Editor Adapter

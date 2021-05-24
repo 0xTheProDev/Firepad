@@ -16,7 +16,7 @@ import {
 } from "./cursor-widget-controller";
 import { ITextOp } from "./text-op";
 import { ITextOperation, TextOperation } from "./text-operation";
-import { IDisposable, Utils, EndOfLineSequence } from "./utils";
+import * as Utils from "./utils";
 
 interface IRemoteCursor {
   clientID: ClientIDType;
@@ -31,7 +31,7 @@ interface ITextModelWithUndoRedo extends monaco.editor.ITextModel {
 export class MonacoAdapter implements IEditorAdapter {
   protected readonly _monaco: monaco.editor.IStandaloneCodeEditor;
   protected readonly _classNames: string[];
-  protected readonly _disposables: IDisposable[];
+  protected readonly _disposables: monaco.IDisposable[];
   protected readonly _remoteCursors: Map<ClientIDType, IRemoteCursor>;
   protected readonly _cursorWidgetController: ICursorWidgetController;
 
@@ -264,7 +264,7 @@ export class MonacoAdapter implements IEditorAdapter {
     cursor: ICursor,
     userColor: string,
     userName?: string
-  ): IDisposable {
+  ): Utils.IDisposable {
     /** House Keeping */
     Utils.validateTruth(
       typeof cursor === "object" &&
@@ -412,7 +412,7 @@ export class MonacoAdapter implements IEditorAdapter {
    */
   protected _getPreviousContentInRange(range?: monaco.Range): string {
     const model = this._getModel();
-    const eol = model ? model.getEOL() : EndOfLineSequence.LF;
+    const eol = model ? model.getEOL() : Utils.EndOfLineSequence.LF;
 
     if (!range) {
       return this._lastDocLines.join(eol);

@@ -1,5 +1,5 @@
 import { ITextOperation, TextOperation } from "./text-operation";
-import { IDisposable, Utils } from "./utils";
+import * as Utils from "./utils";
 import { IWrappedOperation } from "./wrapped-operation";
 
 enum UndoManagerState {
@@ -10,7 +10,7 @@ enum UndoManagerState {
 
 type UndoManagerCallbackType = (operation: IWrappedOperation) => void;
 
-export interface IUndoManager extends IDisposable {
+export interface IUndoManager extends Utils.IDisposable {
   /**
    * Add an operation to the undo or redo stack, depending on the current state
    * of the UndoManager. The operation added must be the inverse of the last

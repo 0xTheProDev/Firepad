@@ -1,4 +1,4 @@
-import { IDisposable, Utils } from "./utils";
+import * as Utils from "./utils";
 
 type EventName = string;
 
@@ -16,7 +16,7 @@ export type EventListeners<E, C> = {
 };
 
 export interface IEventEmitter<T = EventName, E = any, C = {}>
-  extends IDisposable {
+  extends Utils.IDisposable {
   /**
    * Add listener to emitter
    * @param event - Event name

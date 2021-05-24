@@ -4,15 +4,20 @@ import {
   IDatabaseAdapter,
   DatabaseAdapterEvent,
   DatabaseAdapterStateType,
+  IDatabaseAdapterEvent,
 } from "./database-adapter";
-import { IEditorAdapter, EditorAdapterStateType } from "./editor-adapter";
+import {
+  IEditorAdapter,
+  EditorAdapterStateType,
+  IEditorAdapterEvent,
+} from "./editor-adapter";
 import {
   IEditorClient,
   EditorClient,
   EditorClientEvent,
 } from "./editor-client";
 import { IEvent, EventListener, IEventEmitter, EventEmitter } from "./emitter";
-import { IDisposable, Utils } from "./utils";
+import * as Utils from "./utils";
 
 export enum FirepadEvent {
   Ready = "ready",
@@ -36,7 +41,7 @@ export interface IFirepadConstructorOptions {
   defaultText?: string;
 }
 
-export interface IFirepad extends IDisposable {
+export interface IFirepad extends Utils.IDisposable {
   /**
    * Add listener to Firepad.
    * @param event - Event name.
@@ -130,11 +135,12 @@ export class Firepad implements IFirepad {
   }
 
   protected _init(): void {
-    this._databaseAdapter.on(DatabaseAdapterEvent.CursorChange, (
-      userId /**: UserIDType*/
-    ) => {
-      this._trigger(FirepadEvent.CursorChange, userId);
-    });
+    this._databaseAdapter.on(
+      DatabaseAdapterEvent.CursorChange,
+      (userId: UserIDType | IDatabaseAdapterEvent) => {
+        this._trigger(FirepadEvent.CursorChange, userId);
+      }
+    );
 
     this._databaseAdapter.on(DatabaseAdapterEvent.Ready, () => {
       this._ready = true;
@@ -148,29 +154,37 @@ export class Firepad implements IFirepad {
       this._trigger(FirepadEvent.Ready, true);
     });
 
-    this._editorClient.on(EditorClientEvent.Synced, (synced /**: boolean*/) => {
-      this._trigger(FirepadEvent.Synced, synced);
-    });
+    this._editorClient.on(
+      EditorClientEvent.Synced,
+      (synced: boolean | IDatabaseAdapterEvent) => {
+        this._trigger(FirepadEvent.Synced, synced);
+      }
+    );
 
-    this._editorClient.on(EditorClientEvent.Undo, (
-      undoOperation /**: string*/
-    ) => {
-      this._trigger(FirepadEvent.Undo, undoOperation);
-    });
+    this._editorClient.on(
+      EditorClientEvent.Undo,
+      (undoOperation: string | IEditorAdapterEvent) => {
+        this._trigger(FirepadEvent.Undo, undoOperation);
+      }
+    );
 
-    this._editorClient.on(EditorClientEvent.Redo, (
-      redoOperation /**: string*/
-    ) => {
-      this._trigger(FirepadEvent.Redo, redoOperation);
-    });
+    this._editorClient.on(
+      EditorClientEvent.Redo,
+      (redoOperation: string | IEditorAdapterEvent) => {
+        this._trigger(FirepadEvent.Redo, redoOperation);
+      }
+    );
 
-    this._editorClient.on(EditorClientEvent.Error, (
-      error /**: Error*/,
-      operation: string,
-      state: DatabaseAdapterStateType | EditorAdapterStateType
-    ) => {
-      this._trigger(FirepadEvent.Error, error, operation, state);
-    });
+    this._editorClient.on(
+      EditorClientEvent.Error,
+      (
+        error: Error | IEditorAdapterEvent,
+        operation: string,
+        state: DatabaseAdapterStateType | EditorAdapterStateType
+      ) => {
+        this._trigger(FirepadEvent.Error, error, operation, state);
+      }
+    );
   }
 
   getConfiguration(option: keyof IFirepadConstructorOptions): any {

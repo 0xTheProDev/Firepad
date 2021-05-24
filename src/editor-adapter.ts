@@ -1,9 +1,8 @@
 import { ICursor } from "./cursor";
 import { IEvent, EventListener } from "./emitter";
 import { ITextOperation } from "./text-operation";
-import { IDisposable } from "./utils";
+import { IDisposable, VoidFunctionType } from "./utils";
 
-type VoidFunctionType = () => void;
 export type UndoRedoCallbackType = VoidFunctionType;
 export type ClientIDType = string | number;
 

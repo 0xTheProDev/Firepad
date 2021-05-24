@@ -5,9 +5,10 @@ import { Cursor } from "./cursor";
 import {
   DatabaseAdapterEvent,
   IDatabaseAdapter,
+  IDatabaseAdapterEvent,
   UserIDType,
 } from "./database-adapter";
-import { IEditorAdapter } from "./editor-adapter";
+import { IEditorAdapter, IEditorAdapterEvent } from "./editor-adapter";
 import {
   EditorClient,
   EditorClientEvent,
@@ -21,7 +22,7 @@ import {
   IFirepadEvent as IFirepadClassicEvent,
 } from "./firepad";
 import { MonacoAdapter } from "./monaco-adapter";
-import { Utils } from "./utils";
+import * as Utils from "./utils";
 
 interface IFirepadClassicConstructorOptions {
   /** Unique Identifier for current User */
@@ -100,11 +101,12 @@ export default class FirepadClassic implements IFirepad {
   }
 
   protected init(): void {
-    this._databaseAdapter.on(DatabaseAdapterEvent.CursorChange, (
-      userId /**: string*/
-    ) => {
-      this._trigger(FirepadClassicEvent.CursorChange, userId);
-    });
+    this._databaseAdapter.on(
+      DatabaseAdapterEvent.CursorChange,
+      (userId: UserIDType | IDatabaseAdapterEvent) => {
+        this._trigger(FirepadClassicEvent.CursorChange, userId);
+      }
+    );
 
     this._databaseAdapter.on(DatabaseAdapterEvent.Ready, () => {
       this._ready = true;
@@ -118,21 +120,26 @@ export default class FirepadClassic implements IFirepad {
       this._trigger(FirepadClassicEvent.Ready, true);
     });
 
-    this._editorClient.on(EditorClientEvent.Synced, (synced /**: boolean*/) => {
-      this._trigger(FirepadClassicEvent.Synced, synced);
-    });
+    this._editorClient.on(
+      EditorClientEvent.Synced,
+      (synced: boolean | IDatabaseAdapterEvent) => {
+        this._trigger(FirepadClassicEvent.Synced, synced);
+      }
+    );
 
-    this._editorClient.on(EditorClientEvent.Undo, (
-      undoOperation /**: string*/
-    ) => {
-      this._trigger(FirepadClassicEvent.Undo, undoOperation);
-    });
+    this._editorClient.on(
+      EditorClientEvent.Undo,
+      (undoOperation: string | IEditorAdapterEvent) => {
+        this._trigger(FirepadClassicEvent.Undo, undoOperation);
+      }
+    );
 
-    this._editorClient.on(EditorClientEvent.Redo, (
-      redoOperation /**: string*/
-    ) => {
-      this._trigger(FirepadClassicEvent.Redo, redoOperation);
-    });
+    this._editorClient.on(
+      EditorClientEvent.Redo,
+      (redoOperation: string | IEditorAdapterEvent) => {
+        this._trigger(FirepadClassicEvent.Redo, redoOperation);
+      }
+    );
   }
 
   dispose(): void {

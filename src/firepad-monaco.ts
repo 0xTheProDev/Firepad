@@ -5,7 +5,7 @@ import { UserIDType } from "./database-adapter";
 import { FirebaseAdapter } from "./firebase-adapter";
 import { IFirepad, Firepad, IFirepadConstructorOptions } from "./firepad";
 import { MonacoAdapter } from "./monaco-adapter";
-import { Utils } from "./utils";
+import * as Utils from "./utils";
 
 /**
  * Creates a modern Firepad from Monaco editor.
@@ -32,7 +32,7 @@ export function fromMonaco(
     databaseRef,
     userId,
     userColor,
-    userName || userId.toString()
+    userName
   );
   const editorAdapter = new MonacoAdapter(editor, false);
 

@@ -577,8 +577,12 @@ export class MonacoAdapter implements IEditorAdapter {
   }
 
   protected _onCursorActivity(
-    ev_: monaco.editor.ICursorPositionChangedEvent
+    ev: monaco.editor.ICursorPositionChangedEvent
   ): void {
+    if (ev.reason === monaco.editor.CursorChangeReason.RecoverFromMarkers) {
+      return;
+    }
+
     this._cursorTimeout = setTimeout(() => {
       return this._trigger(EditorAdapterEvent.CursorActivity);
     }, 1);

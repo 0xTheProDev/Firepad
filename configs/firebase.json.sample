@@ -1,5 +1,5 @@
 /**
- * Add Proper Information and Copy the file into `./firebase.json`
+ * Copy the file into `./firebase.json`, Add Proper Information and Remove this comment
  */
 {
   "apiKey": "<API_KEY>",

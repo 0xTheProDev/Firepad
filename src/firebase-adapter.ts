@@ -384,7 +384,7 @@ export class FirebaseAdapter implements IDatabaseAdapter {
           // We have an outstanding change at this revision id.
           if (
             this._sent.op.equals(revision.operation) &&
-            revision.author === this._userId
+            revision.author == this._userId
           ) {
             // This is our change; it succeeded.
             if (this._revision % FirebaseAdapter.CHECKPOINT_FREQUENCY === 0) {

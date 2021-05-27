@@ -1,12 +1,12 @@
 .husky
 .DS_Store
-test/coverage/
+coverage
 node_modules
 
 # generated
 dist
-lib
 es
+lib
 types
 
 *.log

@@ -1,6 +1,6 @@
 import * as Utils from "./utils";
 
-type EventName = string;
+export type Event = string;
 
 export type EventListener<E> = (eventArgs: E, ...extraArgs: any[]) => void;
 
@@ -15,7 +15,7 @@ export type EventListeners<E, C> = {
   [event: string]: IEventListener<E, C>[];
 };
 
-export interface IEventEmitter<T = EventName, E = any, C = {}>
+export interface IEventEmitter<T = Event, E = IEvent, C = {}>
   extends Utils.IDisposable {
   /**
    * Add listener to emitter
@@ -36,28 +36,24 @@ export interface IEventEmitter<T = EventName, E = any, C = {}>
    * @param eventAttr - Event Attributes
    * @param extraAttrs - Additionnal Attributes
    */
-  trigger(event: EventName, eventAttr: E, ...extraAttrs: unknown[]): void;
+  trigger(event: Event, eventAttr: E, ...extraAttrs: unknown[]): void;
 }
 
 export class EventEmitter<E = IEvent, C = {}>
-  implements IEventEmitter<EventName, E, C> {
-  protected readonly _allowedEvents: EventName[] | undefined;
+  implements IEventEmitter<Event, E, C> {
+  protected readonly _allowedEvents: Event[] | undefined;
   protected readonly _eventListeners: EventListeners<E, C>;
 
   /**
    * Creates an Event Emitter.
    * @param allowedEvents - Set of Events that Emitter supports (optional).
    */
-  constructor(allowedEvents?: EventName[]) {
+  constructor(allowedEvents?: Event[]) {
     this._allowedEvents = allowedEvents;
     this._eventListeners = {};
   }
 
-  on(
-    event: EventName,
-    listener: EventListener<E>,
-    context?: ThisType<C>
-  ): void {
+  on(event: Event, listener: EventListener<E>, context?: ThisType<C>): void {
     this._validateEvent(event);
 
     this._eventListeners[event] ||= [];
@@ -67,7 +63,7 @@ export class EventEmitter<E = IEvent, C = {}>
     });
   }
 
-  off(event: EventName, listener: EventListener<E>): void {
+  off(event: Event, listener: EventListener<E>): void {
     this._validateEvent(event);
 
     const eventListeners = this._eventListeners[event];
@@ -81,7 +77,7 @@ export class EventEmitter<E = IEvent, C = {}>
     );
   }
 
-  trigger(event: EventName, eventAtrr: E, ...extraAttrs: any[]): void {
+  trigger(event: Event, eventAtrr: E, ...extraAttrs: any[]): void {
     const eventListeners = this._eventListeners[event] || [];
 
     for (const eventListener of eventListeners) {
@@ -96,7 +92,7 @@ export class EventEmitter<E = IEvent, C = {}>
     }
   }
 
-  protected _validateEvent(event: EventName): void {
+  protected _validateEvent(event: Event): void {
     if (!this._allowedEvents || this._allowedEvents.includes(event)) {
       return;
     }

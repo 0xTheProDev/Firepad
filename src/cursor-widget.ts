@@ -26,7 +26,7 @@ export interface ICursorWidgetConstructorOptions {
 
 export interface ICursorWidget
   extends monaco.editor.IContentWidget,
-  Utils.IDisposable {
+    Utils.IDisposable {
   /**
    * Update Widget position according to the Cursor position.
    * @param range - Current Position of the Cursor.

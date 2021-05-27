@@ -29,7 +29,10 @@ interface IClientStateMachine {
   isAwaitingWithBuffer(): boolean;
 }
 
-export interface IClient extends IBaseClient, IClientStateMachine, Utils.IDisposable {
+export interface IClient
+  extends IBaseClient,
+    IClientStateMachine,
+    Utils.IDisposable {
   /**
    * Send operation to remote users.
    * @param operation - Text Operation from Editor Adapter

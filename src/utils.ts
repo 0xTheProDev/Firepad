@@ -1,5 +1,5 @@
 /** Function with no parameter and no return value.  */
-export function noop(): void { }
+export function noop(): void {}
 export type VoidFunctionType = typeof noop;
 
 /**
@@ -76,9 +76,7 @@ class DatabaseTransactionError extends Error {
  */
 export function validateInteger(n: number, err?: string): void {
   if (!Number.isInteger(n)) {
-    throw new ValidationError(
-      err || "Expected an integer value"
-    );
+    throw new ValidationError(err || "Expected an integer value");
   }
 }
 
@@ -91,9 +89,7 @@ export function validateNonNegativeInteger(n: number, err?: string): void {
   validateInteger(n, err);
 
   if (n < 0) {
-    throw new ValidationError(
-      err || "Expected a non-negative integer value"
-    );
+    throw new ValidationError(err || "Expected a non-negative integer value");
   }
 }
 
@@ -104,9 +100,7 @@ export function validateNonNegativeInteger(n: number, err?: string): void {
  */
 export function validateString(n: string, err?: string): void {
   if (typeof n !== "string") {
-    throw new ValidationError(
-      err || "Expected a string value"
-    );
+    throw new ValidationError(err || "Expected a string value");
   }
 }
 
@@ -123,8 +117,7 @@ export function validateEquality(
 ) {
   if (first !== second) {
     throw new ValidationError(
-      err ||
-      `Expected ${first.toString()} to be equal to ${second.toString()}.`
+      err || `Expected ${first.toString()} to be equal to ${second.toString()}.`
     );
   }
 }
@@ -143,7 +136,7 @@ export function validateInEquality(
   if (first === second) {
     throw new ValidationError(
       err ||
-      `Validation failed: Expected ${first.toString()} to not be equal to ${second.toString()}.`
+        `Validation failed: Expected ${first.toString()} to not be equal to ${second.toString()}.`
     );
   }
 }
@@ -154,11 +147,14 @@ export function validateInEquality(
  * @param second - Second Parameter for validation.
  * @param err - Custom Error Message.
  */
-export function validateLessOrEqual(first: number, second: number, err?: string) {
+export function validateLessOrEqual(
+  first: number,
+  second: number,
+  err?: string
+) {
   if (first > second) {
     throw new ValidationError(
-      err ||
-      `Expected ${first} to be less than or equal to ${second}.`
+      err || `Expected ${first} to be less than or equal to ${second}.`
     );
   }
 }
@@ -170,9 +166,7 @@ export function validateLessOrEqual(first: number, second: number, err?: string)
  */
 export function validateTruth(arg: boolean | null | undefined, err?: string) {
   if (arg == null || arg === false) {
-    throw new ValidationError(
-      err || "Expected a Truth value"
-    );
+    throw new ValidationError(err || "Expected a Truth value");
   }
 }
 
@@ -183,9 +177,7 @@ export function validateTruth(arg: boolean | null | undefined, err?: string) {
  */
 export function validateFalse(arg: boolean | null | undefined, err?: string) {
   if (arg === true) {
-    throw new ValidationError(
-      err || "Expected a False value"
-    );
+    throw new ValidationError(err || "Expected a False value");
   }
 }
 
@@ -220,7 +212,7 @@ export function shouldNotBeListenedTo(event: string, err?: string): void {
 export function shouldNotBeComposedOrApplied(err?: string): void {
   throw new InvalidOperationOrderError(
     err ||
-    "Invalid order of operation recieved that cannot be composed or applied"
+      "Invalid order of operation recieved that cannot be composed or applied"
   );
 }
 
@@ -310,7 +302,11 @@ function hueToRgb(
  * @param saturation - Saturation of the color.
  * @param lightness - Brightness of the color.
  */
-export function hslToHex(hue: number, saturation: number, lightness: number): string {
+export function hslToHex(
+  hue: number,
+  saturation: number,
+  lightness: number
+): string {
   if (saturation === 0) {
     return rgbToHex(lightness, lightness, lightness);
   }

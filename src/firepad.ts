@@ -1,22 +1,27 @@
 import { Cursor } from "./cursor";
 import {
-  UserIDType,
-  IDatabaseAdapter,
   DatabaseAdapterEvent,
   DatabaseAdapterStateType,
+  IDatabaseAdapter,
   IDatabaseAdapterEvent,
+  UserIDType,
 } from "./database-adapter";
 import {
-  IEditorAdapter,
   EditorAdapterStateType,
+  IEditorAdapter,
   IEditorAdapterEvent,
 } from "./editor-adapter";
 import {
-  IEditorClient,
   EditorClient,
   EditorClientEvent,
+  IEditorClient,
 } from "./editor-client";
-import { IEvent, EventListener, IEventEmitter, EventEmitter } from "./emitter";
+import {
+  EventEmitter,
+  EventListenerType,
+  IEvent,
+  IEventEmitter,
+} from "./emitter";
 import * as Utils from "./utils";
 
 export enum FirepadEvent {
@@ -47,13 +52,13 @@ export interface IFirepad extends Utils.IDisposable {
    * @param event - Event name.
    * @param listener - Event handler callback.
    */
-  on(event: FirepadEvent, listener: EventListener<IFirepadEvent>): void;
+  on(event: FirepadEvent, listener: EventListenerType<IFirepadEvent>): void;
   /**
    * Remove listener to Database Adapter.
    * @param event - Event name.
    * @param listener - Event handler callback.
    */
-  off(event: FirepadEvent, listener: EventListener<IFirepadEvent>): void;
+  off(event: FirepadEvent, listener: EventListenerType<IFirepadEvent>): void;
   /**
    * Tests if any operation has been performed in Firepad.
    */
@@ -197,11 +202,11 @@ export class Firepad implements IFirepad {
     return option in this._options ? this._options[option] : null;
   }
 
-  on(event: FirepadEvent, listener: EventListener<IFirepadEvent>): void {
+  on(event: FirepadEvent, listener: EventListenerType<IFirepadEvent>): void {
     return this._emitter?.on(event, listener);
   }
 
-  off(event: FirepadEvent, listener: EventListener<IFirepadEvent>): void {
+  off(event: FirepadEvent, listener: EventListenerType<IFirepadEvent>): void {
     return this._emitter?.off(event, listener);
   }
 

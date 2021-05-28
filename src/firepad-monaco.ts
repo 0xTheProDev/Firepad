@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 
 import { UserIDType } from "./database-adapter";
 import { FirebaseAdapter } from "./firebase-adapter";
-import { IFirepad, Firepad, IFirepadConstructorOptions } from "./firepad";
+import { Firepad, IFirepad, IFirepadConstructorOptions } from "./firepad";
 import { MonacoAdapter } from "./monaco-adapter";
 import * as Utils from "./utils";
 

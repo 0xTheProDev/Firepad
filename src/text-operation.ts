@@ -1,4 +1,4 @@
-import { ITextOp, TextOp, ITextOpAttributes, TextOptType } from "./text-op";
+import { ITextOp, ITextOpAttributes, TextOp, TextOptType } from "./text-op";
 import * as Utils from "./utils";
 
 /**

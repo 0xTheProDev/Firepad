@@ -8,6 +8,7 @@
  */
 
 import * as monaco from "monaco-editor";
+
 import { ClientIDType } from "./editor-adapter";
 import * as Utils from "./utils";
 

@@ -1,5 +1,6 @@
 import * as monaco from "monaco-editor";
-import { ICursorWidget, CursorWidget } from "./cursor-widget";
+
+import { CursorWidget, ICursorWidget } from "./cursor-widget";
 import { ClientIDType } from "./editor-adapter";
 import { IDisposable } from "./utils";
 

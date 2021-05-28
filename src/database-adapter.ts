@@ -1,6 +1,6 @@
 import { ICursor } from "./cursor";
+import { EventListenerType, IEvent } from "./emitter";
 import { ITextOperation } from "./text-operation";
-import { IEvent, EventListener } from "./emitter";
 import { IDisposable } from "./utils";
 
 export type UserIDType = string | number;
@@ -36,10 +36,10 @@ export interface IDatabaseAdapterEvent extends IEvent {}
 
 export type DatabaseAdapterCallbackType = {
   [DatabaseAdapterEvent.Error]: DatabaseOnErrorFunctionType;
-  [DatabaseAdapterEvent.Retry]: EventListener<IDatabaseAdapterEvent>;
-  [DatabaseAdapterEvent.Operation]: EventListener<ITextOperation>;
-  [DatabaseAdapterEvent.Acknowledge]: EventListener<IDatabaseAdapterEvent>;
-  [DatabaseAdapterEvent.CursorChange]: EventListener<string>;
+  [DatabaseAdapterEvent.Retry]: EventListenerType<IDatabaseAdapterEvent>;
+  [DatabaseAdapterEvent.Operation]: EventListenerType<ITextOperation>;
+  [DatabaseAdapterEvent.Acknowledge]: EventListenerType<IDatabaseAdapterEvent>;
+  [DatabaseAdapterEvent.CursorChange]: EventListenerType<string>;
 };
 
 /**
@@ -120,7 +120,7 @@ export interface IDatabaseAdapter extends IDisposable {
    */
   on(
     event: DatabaseAdapterEvent,
-    listener: EventListener<IDatabaseAdapterEvent>
+    listener: EventListenerType<IDatabaseAdapterEvent>
   ): void;
   /**
    * Remove listener to Database Adapter.
@@ -129,7 +129,7 @@ export interface IDatabaseAdapter extends IDisposable {
    */
   off(
     event: DatabaseAdapterEvent,
-    listener: EventListener<IDatabaseAdapterEvent>
+    listener: EventListenerType<IDatabaseAdapterEvent>
   ): void;
   /**
    * Add multiple listener to Database Adapter.

@@ -1,19 +1,19 @@
 import * as monaco from "monaco-editor";
 
-import { ICursor, Cursor } from "./cursor";
-import {
-  ClientIDType,
-  IEditorAdapter,
-  IEditorAdapterEvent,
-  EditorAdapterEvent,
-  EditorEventCallbackType,
-  UndoRedoCallbackType,
-} from "./editor-adapter";
-import { IEventEmitter, EventListener, EventEmitter } from "./emitter";
+import { Cursor, ICursor } from "./cursor";
 import {
   CursorWidgetController,
   ICursorWidgetController,
 } from "./cursor-widget-controller";
+import {
+  ClientIDType,
+  EditorAdapterEvent,
+  EditorEventCallbackType,
+  IEditorAdapter,
+  IEditorAdapterEvent,
+  UndoRedoCallbackType,
+} from "./editor-adapter";
+import { EventEmitter, EventListenerType, IEventEmitter } from "./emitter";
 import { ITextOp } from "./text-op";
 import { ITextOperation, TextOperation } from "./text-operation";
 import * as Utils from "./utils";
@@ -172,14 +172,14 @@ export class MonacoAdapter implements IEditorAdapter {
 
   on(
     event: EditorAdapterEvent,
-    listener: EventListener<IEditorAdapterEvent>
+    listener: EventListenerType<IEditorAdapterEvent>
   ): void {
     return this._emitter?.on(event, listener);
   }
 
   off(
     event: EditorAdapterEvent,
-    listener: EventListener<IEditorAdapterEvent>
+    listener: EventListenerType<IEditorAdapterEvent>
   ): void {
     return this._emitter?.off(event, listener);
   }
@@ -188,7 +188,7 @@ export class MonacoAdapter implements IEditorAdapter {
     Object.entries(callbacks).forEach(([event, listener]) => {
       this.on(
         event as EditorAdapterEvent,
-        listener as EventListener<IEditorAdapterEvent>
+        listener as EventListenerType<IEditorAdapterEvent>
       );
     });
   }

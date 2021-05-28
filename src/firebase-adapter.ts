@@ -1,22 +1,23 @@
-import * as firebase from "firebase/app";
 import "firebase/database";
 
-import { IEventEmitter, EventEmitter, EventListener } from "./emitter";
+import * as firebase from "firebase/app";
+
+import { CursorType, ICursor } from "./cursor";
 import {
-  UserIDType,
+  DatabaseAdapterCallbackType,
+  DatabaseAdapterEvent as FirebaseAdapterEvent,
   IDatabaseAdapter,
   IDatabaseAdapterEvent,
   SendCursorCallbackType,
   SendOperationCallbackType,
-  DatabaseAdapterCallbackType,
-  DatabaseAdapterEvent as FirebaseAdapterEvent,
+  UserIDType,
 } from "./database-adapter";
+import { EventEmitter, EventListenerType, IEventEmitter } from "./emitter";
 import {
   ITextOperation,
   TextOperation,
   TextOperationType,
 } from "./text-operation";
-import { ICursor, CursorType } from "./cursor";
 import * as Utils from "./utils";
 
 type FirebaseRefCallbackType = (
@@ -206,14 +207,14 @@ export class FirebaseAdapter implements IDatabaseAdapter {
 
   on(
     event: FirebaseAdapterEvent,
-    listener: EventListener<IFirebaseAdapterEvent>
+    listener: EventListenerType<IFirebaseAdapterEvent>
   ): void {
     return this._emitter?.on(event, listener);
   }
 
   off(
     event: FirebaseAdapterEvent,
-    listener: EventListener<IFirebaseAdapterEvent>
+    listener: EventListenerType<IFirebaseAdapterEvent>
   ): void {
     return this._emitter?.off(event, listener);
   }
@@ -222,7 +223,7 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     Object.entries(callbacks).forEach(([event, listener]) => {
       this.on(
         event as FirebaseAdapterEvent,
-        listener as EventListener<IFirebaseAdapterEvent>
+        listener as EventListenerType<IFirebaseAdapterEvent>
       );
     });
   }

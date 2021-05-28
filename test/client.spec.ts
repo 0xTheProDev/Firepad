@@ -13,10 +13,10 @@ describe("Client", () => {
 
     operator = {
       sendOperation(operation: ITextOperation) {
-        return sendOperationStub(operation);
+        sendOperationStub(operation);
       },
       applyOperation(operation: ITextOperation) {
-        return applyOperationStub(operation);
+        applyOperationStub(operation);
       },
     };
   });

@@ -1,8 +1,13 @@
-import { IBaseClient, IClient, Client } from "./client";
-import { ICursor, Cursor, CursorType } from "./cursor";
+import { Client, IBaseClient, IClient } from "./client";
+import { Cursor, CursorType, ICursor } from "./cursor";
 import { IDatabaseAdapter } from "./database-adapter";
 import { IEditorAdapter } from "./editor-adapter";
-import { IEvent, IEventEmitter, EventEmitter, EventListener } from "./emitter";
+import {
+  EventEmitter,
+  EventListenerType,
+  IEvent,
+  IEventEmitter,
+} from "./emitter";
 import { OperationMeta } from "./operation-meta";
 import { IRemoteClient, RemoteClient } from "./remote-client";
 import { ITextOperation } from "./text-operation";
@@ -27,7 +32,7 @@ export interface IEditorClient extends IBaseClient, IDisposable {
    */
   on(
     event: EditorClientEvent,
-    listener: EventListener<IEditorClientEvent>
+    listener: EventListenerType<IEditorClientEvent>
   ): void;
   /**
    * Remove listener to Editor Client.
@@ -36,7 +41,7 @@ export interface IEditorClient extends IBaseClient, IDisposable {
    */
   off(
     event: EditorClientEvent,
-    listener: EventListener<IEditorClientEvent>
+    listener: EventListenerType<IEditorClientEvent>
   ): void;
   /**
    * Clears undo redo stack of current Editor model.
@@ -182,14 +187,14 @@ export class EditorClient implements IEditorClient {
 
   on(
     event: EditorClientEvent,
-    listener: EventListener<IEditorClientEvent>
+    listener: EventListenerType<IEditorClientEvent>
   ): void {
     return this._emitter?.on(event, listener);
   }
 
   off(
     event: EditorClientEvent,
-    listener: EventListener<IEditorClientEvent>
+    listener: EventListenerType<IEditorClientEvent>
   ): void {
     return this._emitter?.off(event, listener);
   }

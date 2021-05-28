@@ -1,5 +1,5 @@
 import { ICursor } from "./cursor";
-import { IEvent, EventListener } from "./emitter";
+import { EventListenerType, IEvent } from "./emitter";
 import { ITextOperation } from "./text-operation";
 import { IDisposable, VoidFunctionType } from "./utils";
 
@@ -57,7 +57,7 @@ export interface IEditorAdapter extends IDisposable {
    */
   on(
     event: EditorAdapterEvent,
-    listener: EventListener<IEditorAdapterEvent>
+    listener: EventListenerType<IEditorAdapterEvent>
   ): void;
   /**
    * Remove listener to Editor Adapter.
@@ -66,7 +66,7 @@ export interface IEditorAdapter extends IDisposable {
    */
   off(
     event: EditorAdapterEvent,
-    listener: EventListener<IEditorAdapterEvent>
+    listener: EventListenerType<IEditorAdapterEvent>
   ): void;
   /**
    * `registerCallback` attaches callback for Editor Event handling from top-level.

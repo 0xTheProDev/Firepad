@@ -1,3 +1,5 @@
+import * as Utils from "./utils";
+
 export enum TextOptType {
   Insert = "insert",
   Delete = "delete",
@@ -61,13 +63,13 @@ export interface ITextOp {
 /**
  * Operation are essentially lists of ops. There are three types of ops:
  *
- * Retain ops: Advance the cursor position by a given number of characters.
+ * **Retain ops:** Advance the cursor position by a given number of characters.
  * Represented by positive ints.
  *
- * Insert ops: Insert a given string at the current cursor position.
+ * **Insert ops:** Insert a given string at the current cursor position.
  * Represented by strings.
  *
- * Delete ops: Delete the next n characters. Represented by negative ints.
+ * **Delete ops:** Delete the next n characters. Represented by negative ints.
  */
 export class TextOp implements ITextOp {
   protected readonly _type: TextOptType;
@@ -186,7 +188,7 @@ export class TextOp implements ITextOp {
 
   toString(): string {
     const text = this.text ? `"${this.text}"` : this.chars;
-    return `${this._type} ${text}`;
+    return `${Utils.capitalizeFirstLetter(this._type)} ${text}`;
   }
 
   valueOf(): string | number | null {

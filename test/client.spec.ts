@@ -30,8 +30,10 @@ describe("Client", () => {
     jest.resetAllMocks();
   });
 
-  it("should start with `Synchronized` state", () => {
-    expect(client.isSynchronized()).toEqual(true);
+  describe("#isSynchronized", () => {
+    it("should start with `Synchronized` state", () => {
+      expect(client.isSynchronized()).toEqual(true);
+    });
   });
 
   describe("#applyClient", () => {

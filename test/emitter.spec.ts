@@ -1,14 +1,14 @@
 import {
-  Event,
+  EventType,
   EventEmitter,
-  EventListener,
+  EventListenerType,
   IEventEmitter,
 } from "../src/emitter";
 
 describe("Emitter", () => {
-  let event: Event;
+  let event: EventType;
   let emitter: IEventEmitter;
-  let eventListener: EventListener<unknown>;
+  let eventListener: EventListenerType<unknown>;
 
   beforeAll(() => {
     event = "Some Event";

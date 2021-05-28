@@ -6,11 +6,11 @@ import { IDisposable } from "./utils";
 export interface IRemoteClient {
   /** Set Cursor/Selection Color for Remote Client */
   setColor(color: string): void;
-  /** Set Cursor/Selection Content for Remote Client */
+  /** Set Cursor/Selection Owner for Remote Client */
   setUserName(userName: string): void;
-  /** Update Cursor position for Remote Client */
+  /** Update Cursor/Selection position for Remote Client */
   updateCursor(cursor: ICursor): void;
-  /** Remove Cursor from Editor */
+  /** Remove Cursor/Selection from Editor */
   removeCursor(): void;
 }
 

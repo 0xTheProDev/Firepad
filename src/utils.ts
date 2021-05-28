@@ -340,3 +340,11 @@ export function colorFromUserId(userId: string) {
 
   return hslToHex(hue, 1, 0.75);
 }
+
+/**
+ * Capitalises first letter of the given text.
+ * @param text - Incoming Text segment.
+ */
+export function capitalizeFirstLetter(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}

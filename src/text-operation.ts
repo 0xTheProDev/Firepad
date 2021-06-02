@@ -22,19 +22,19 @@ export interface ITextOperation {
   equals(other: ITextOperation): boolean;
   /**
    * Skip over a given number of characters.
-   * @param n - Number of Characters to Skip
-   * @param attributes - Additional Attributes for Retain
+   * @param n - Number of Characters to Skip.
+   * @param attributes - Additional Attributes for Retain.
    */
   retain(n: number, attributes: ITextOpAttributes | null): ITextOperation;
   /**
    * Insert a string at the current position.
-   * @param str - String to be Inserted
-   * @param attributes - Additional Attributes for Insert
+   * @param str - String to be Inserted.
+   * @param attributes - Additional Attributes for Insert.
    */
   insert(str: string, attributes: ITextOpAttributes | null): ITextOperation;
   /**
    * Delete a string at the current position.
-   * @param n - Number of Characters or String to be Deleted
+   * @param n - Number of Characters or String to be Deleted.
    */
   delete(n: number | string): ITextOperation;
   /**
@@ -42,7 +42,7 @@ export interface ITextOperation {
    */
   isNoop(): boolean;
   /**
-   * Returns Shallow copy current operation
+   * Returns Shallow copy of current operation.
    */
   clone(): ITextOperation;
   /**
@@ -95,7 +95,7 @@ export interface ITextOperation {
   /**
    * Decides whether two operations should be composed with each other
    * if they were inverted, that is
-   * `shouldBeComposedWith(A, B) = shouldBeComposedWithInverted(B', A'})`.
+   * `shouldBeComposedWith(A, B) = shouldBeComposedWithInverted(B', A')`.
    * @param other - Other Operation
    */
   shouldBeComposedWithInverted(other: ITextOperation): boolean;
@@ -164,7 +164,7 @@ export class TextOperation implements ITextOperation {
    * Returns nth last op from the ops array.
    * @param n - Reverse Index of the item.
    */
-  protected _last(n: number = 0) {
+  protected _last(n: number = 0): ITextOp | null {
     return this._ops.length > n ? this._ops[this._ops.length - n - 1] : null;
   }
 
@@ -172,7 +172,7 @@ export class TextOperation implements ITextOperation {
   // actions of an operation (skip/insert/delete) with these three builder
   // methods. They all return the operation for convenient chaining.
 
-  retain(n: number, attributes: ITextOpAttributes | null): ITextOperation {
+  retain(n: number, attributes: ITextOpAttributes | null): TextOperation {
     Utils.validateNonNegativeInteger(n, "retain expects a positive integer.");
 
     if (n === 0) {
@@ -182,6 +182,7 @@ export class TextOperation implements ITextOperation {
     this._baseLength += n;
     this._targetLength += n;
 
+    attributes ||= {};
     const prevOp = this._last();
 
     if (prevOp && prevOp.isRetain() && prevOp.attributesEqual(attributes)) {
@@ -195,7 +196,7 @@ export class TextOperation implements ITextOperation {
     return this;
   }
 
-  insert(str: string, attributes: ITextOpAttributes | null): ITextOperation {
+  insert(str: string, attributes: ITextOpAttributes | null): TextOperation {
     Utils.validateString(str, "insert expects a string.");
 
     if (str === "") {
@@ -204,6 +205,7 @@ export class TextOperation implements ITextOperation {
 
     this._targetLength += str.length;
 
+    attributes ||= {};
     const prevOp = this._last();
     const prevPrevOp = this._last(1);
 
@@ -237,7 +239,7 @@ export class TextOperation implements ITextOperation {
     return this;
   }
 
-  delete(n: number | string): ITextOperation {
+  delete(n: number | string): TextOperation {
     let num: number = n as number;
 
     if (typeof n === "string") {
@@ -275,9 +277,10 @@ export class TextOperation implements ITextOperation {
   }
 
   clone(): TextOperation {
+    const ops = this._ops;
     const clone = new TextOperation();
 
-    this._ops.forEach((op) => {
+    for (const op of ops) {
       if (op.isRetain()) {
         clone.retain(op.chars!, op.attributes);
       } else if (op.isInsert()) {
@@ -285,7 +288,7 @@ export class TextOperation implements ITextOperation {
       } else {
         clone.delete(op.chars!);
       }
-    });
+    }
 
     return clone;
   }
@@ -436,7 +439,7 @@ export class TextOperation implements ITextOperation {
     return content;
   }
 
-  invert(content: string): ITextOperation {
+  invert(content: string): TextOperation {
     const inverse = new TextOperation();
     let cursorPosition = 0;
 
@@ -461,11 +464,11 @@ export class TextOperation implements ITextOperation {
   protected static _nextTextOp(
     opIterator: IterableIterator<[number, ITextOp]>
   ): ITextOp | null {
-    const opIteratorResult = opIterator.next().value;
+    const opIteratorResult: [number, ITextOp] | void = opIterator.next().value;
     return opIteratorResult ? opIteratorResult[1] : null;
   }
 
-  compose(otherOperation: TextOperation): ITextOperation {
+  compose(otherOperation: TextOperation): TextOperation {
     Utils.validateEquality(
       this._targetLength,
       otherOperation._baseLength,
@@ -613,7 +616,7 @@ export class TextOperation implements ITextOperation {
     first: ITextOpAttributes | null,
     second: ITextOpAttributes | null,
     firstOpIsInsert: boolean
-  ) {
+  ): ITextOpAttributes {
     const merged: ITextOpAttributes = {};
 
     for (const attr in first) {
@@ -733,7 +736,7 @@ export class TextOperation implements ITextOperation {
     return false;
   }
 
-  static transformAttributes(
+  protected static _transformAttributes(
     attributes1: ITextOpAttributes | null,
     attributes2: ITextOpAttributes | null
   ): [ITextOpAttributes, ITextOpAttributes] {
@@ -841,7 +844,7 @@ export class TextOperation implements ITextOperation {
       if (op1.isRetain() && op2.isRetain()) {
         // Simple case: retain/retain
         let cursorPosition: number = 0;
-        const attributesPrime = TextOperation.transformAttributes(
+        const attributesPrime = TextOperation._transformAttributes(
           op1.attributes,
           op2.attributes
         );
@@ -944,7 +947,7 @@ export class TextOperation implements ITextOperation {
   }
 
   // convenience method to write transform(a, b) as a.transform(b)
-  transform(operation: TextOperation): [ITextOperation, ITextOperation] {
+  transform(operation: TextOperation): [TextOperation, TextOperation] {
     return TextOperation.transform(this, operation);
   }
 

@@ -279,9 +279,7 @@ export class MonacoAdapter implements IEditorAdapter {
     Utils.validateFalse(position < 0 || selectionEnd < 0);
 
     /** Fetch Client Cursor Information */
-    let remoteCursor: IRemoteCursor | undefined = this._remoteCursors.get(
-      clientID
-    );
+    let remoteCursor: IRemoteCursor | void = this._remoteCursors.get(clientID);
 
     if (!remoteCursor) {
       /** Initialize empty array, if client does not exist */
@@ -360,9 +358,7 @@ export class MonacoAdapter implements IEditorAdapter {
 
     return {
       dispose: () => {
-        const cursor: IRemoteCursor | undefined = this._remoteCursors.get(
-          clientID
-        );
+        const cursor: IRemoteCursor | void = this._remoteCursors.get(clientID);
 
         if (!cursor) {
           // Already disposed, nothing to do.

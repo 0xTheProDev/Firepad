@@ -10,6 +10,17 @@ export interface ITextOpAttributes {
   [attributeKey: string]: number | boolean | string | symbol;
 }
 
+/**
+ * Operation are essentially lists of ops. There are three types of ops:
+ *
+ * **Retain ops:** Advance the cursor position by a given number of characters.
+ * Represented by positive ints.
+ *
+ * **Insert ops:** Insert a given string at the current cursor position.
+ * Represented by strings.
+ *
+ * **Delete ops:** Delete the next n characters. Represented by negative ints.
+ */
 export interface ITextOp {
   /**
    * Number of characters Retained or Deleted. (`null` in case of Insert)
@@ -60,17 +71,6 @@ export interface ITextOp {
   valueOf(): string | number | null;
 }
 
-/**
- * Operation are essentially lists of ops. There are three types of ops:
- *
- * **Retain ops:** Advance the cursor position by a given number of characters.
- * Represented by positive ints.
- *
- * **Insert ops:** Insert a given string at the current cursor position.
- * Represented by strings.
- *
- * **Delete ops:** Delete the next n characters. Represented by negative ints.
- */
 export class TextOp implements ITextOp {
   protected readonly _type: TextOptType;
 

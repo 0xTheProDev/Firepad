@@ -119,6 +119,11 @@ export class Firepad implements IFirepad {
     editorAdapter: IEditorAdapter,
     options: IFirepadConstructorOptions
   ) {
+    /** If not called with `new` operator */
+    if (!(this instanceof Firepad)) {
+      return new Firepad(databaseAdapter, editorAdapter, options);
+    }
+
     Utils.validateEquality(
       editorAdapter.getText(),
       "",

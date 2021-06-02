@@ -26,10 +26,18 @@ const StableVersionRegex = /^[0-9]+\.[0-9]+\.[0-9]+$/;
 
 /**
  * Tests whether or not we are in `master` branch.
- * @returns True if the current branch is `master`, else False
+ * @returns True if the current branch is `master`, else False.
  */
 function isMasterBranch() {
   return process.env.BRANCH === "ref/heads/master";
+}
+
+/**
+ * Tests whether or not the current Configuration allows to release Beta version.
+ * @returns True if the current Configuration allows to release Beta version, else False otherwise.
+ */
+function enableBetaRelease() {
+  return ["True", "true", "1", 1, true].includes(process.env.ENABLE_BETA);
 }
 
 /**
@@ -170,6 +178,11 @@ function logInvalidVersionNameError(isMaster) {
  */
 async function main() {
   const isMaster = isMasterBranch();
+
+  if (!isMaster && !enableBetaRelease()) {
+    return;
+  }
+
   const isValidVersion = validateVersion(isMaster);
 
   if (!isValidVersion) {

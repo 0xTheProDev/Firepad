@@ -41,7 +41,7 @@ export interface IEventEmitter<T = EventType, E = IEvent, C = {}>
 
 export class EventEmitter<E = IEvent, C = {}>
   implements IEventEmitter<EventType, E, C> {
-  protected readonly _allowedEvents: EventType[] | undefined;
+  protected readonly _allowedEvents: EventType[] | void;
   protected readonly _eventListeners: EventListeners<E, C>;
 
   /**

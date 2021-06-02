@@ -18,8 +18,8 @@ export class RemoteClient implements IRemoteClient {
   protected readonly _clientId: UserIDType;
   protected readonly _editorAdapter: IEditorAdapter;
 
-  protected _userName: string | undefined;
-  protected _userColor: string | undefined;
+  protected _userName: string;
+  protected _userColor: string;
   protected _userCursor: ICursor | null;
   protected _mark: IDisposable | null;
 
@@ -47,7 +47,7 @@ export class RemoteClient implements IRemoteClient {
     this._mark = this._editorAdapter.setOtherCursor(
       this._clientId,
       cursor,
-      this._userColor!,
+      this._userColor,
       this._userName
     );
   }

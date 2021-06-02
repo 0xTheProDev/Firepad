@@ -16,15 +16,15 @@ export interface IBaseClient {
 
 interface IClientStateMachine {
   /**
-   * Tests whether the Client is Synchronized with Server or not.
+   * Tests whether the Client State is Synchronized with Server or not.
    */
   isSynchronized(): boolean;
   /**
-   * Tests whether the Client is Waiting for Acknowledgement with Server or not.
+   * Tests whether the Client State is Waiting for Acknowledgement with Server or not.
    */
   isAwaitingConfirm(): boolean;
   /**
-   * Tests whether the Client is Waiting for Acknowledgement with Server along with pending Operation or not.
+   * Tests whether the Client State is Waiting for Acknowledgement with Server along with pending Operation or not.
    */
   isAwaitingWithBuffer(): boolean;
 }

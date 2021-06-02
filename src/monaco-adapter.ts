@@ -44,6 +44,7 @@ export class MonacoAdapter implements IEditorAdapter {
   protected _redoCallback: UndoRedoCallbackType | null;
   protected _originalUndo: UndoRedoCallbackType | null;
   protected _originalRedo: UndoRedoCallbackType | null;
+  protected _initiated: boolean;
 
   /**
    * Wraps a monaco editor in adapter to work with rest of Firepad
@@ -406,6 +407,10 @@ export class MonacoAdapter implements IEditorAdapter {
     ]);
   }
 
+  setInitiated(init: boolean): void {
+    this._initiated = init;
+  }
+
   /**
    * Returns content from editor for given range or whole content.
    * @param range - Range of the editor to pick content from (optional).
@@ -592,7 +597,7 @@ export class MonacoAdapter implements IEditorAdapter {
     ev: Pick<monaco.editor.IModelContentChangedEvent, "changes">
   ): void {
     /** Ignore if change is being applied by firepad itself. */
-    if (this._ignoreChanges) {
+    if (this._ignoreChanges || !this._initiated) {
       return;
     }
 

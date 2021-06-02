@@ -118,6 +118,11 @@ export interface IEditorAdapter extends IDisposable {
    * Applies operation into Editor.
    * @param operation - Text Operation.
    */
+  setInitiated(init: boolean): void;
+  /**
+   * Sets the inititated boolean which in turn allows onChange events to progress
+   * @param _initiated - initiated boolean that represent initial firebase Revisions.
+   */
   applyOperation(operation: ITextOperation): void;
   /**
    * Returns invert operation based on current Editor content

@@ -114,7 +114,11 @@ export class Firepad implements IFirepad {
     editorAdapter: IEditorAdapter,
     options: IFirepadConstructorOptions
   ) {
-    Utils.validateEquality(editorAdapter.getText(), "", "Editor should be empty before initialisation of Firepad");
+    Utils.validateEquality(
+      editorAdapter.getText(),
+      "",
+      "Editor should be empty before initialisation of Firepad"
+    );
 
     this._ready = false;
     this._zombie = false;
@@ -143,6 +147,10 @@ export class Firepad implements IFirepad {
         this._trigger(FirepadEvent.CursorChange, userId);
       }
     );
+
+    this._databaseAdapter.on(DatabaseAdapterEvent.InitialRevisions, () => {
+      this._editorAdapter.setInitiated(true);
+    });
 
     this._databaseAdapter.on(DatabaseAdapterEvent.Ready, () => {
       this._ready = true;

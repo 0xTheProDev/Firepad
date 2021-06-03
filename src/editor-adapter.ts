@@ -115,6 +115,11 @@ export interface IEditorAdapter extends IDisposable {
    */
   setText(text: string): void;
   /**
+   * Sets the Inititated boolean which in turn allows onChange events to progress.
+   * @param init - Boolean that represent initial firebase Revisions.
+   */
+  setInitiated(init: boolean): void;
+  /**
    * Applies operation into Editor.
    * @param operation - Text Operation.
    */

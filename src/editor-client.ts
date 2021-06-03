@@ -129,6 +129,9 @@ export class EditorClient implements IEditorClient {
       operation: (operation: ITextOperation) => {
         this._client.applyServer(operation);
       },
+      initialRevisions: () => {
+        this._editorAdapter.setInitiated(true);
+      },
       cursor: (
         clientId: string,
         cursor: CursorType | null,

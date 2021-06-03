@@ -80,6 +80,7 @@ interface IRevision {
 
 export class FirebaseAdapter implements IDatabaseAdapter {
   protected _zombie: boolean;
+  protected _initialRevisions: boolean;
   protected _ready: boolean;
   protected _revision: number;
   protected _sent: ISentOperation | null;
@@ -120,6 +121,7 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     this._ready = false;
     this._firebaseCallbacks = [];
     this._zombie = false;
+    this._initialRevisions = false;
 
     // Add User Information
     this.setUserId(userId);
@@ -148,6 +150,7 @@ export class FirebaseAdapter implements IDatabaseAdapter {
       FirebaseAdapterEvent.Operation,
       FirebaseAdapterEvent.Ready,
       FirebaseAdapterEvent.Retry,
+      FirebaseAdapterEvent.InitialRevisions,
     ]);
 
     this._init();
@@ -317,6 +320,11 @@ export class FirebaseAdapter implements IDatabaseAdapter {
     }
 
     Utils.validateFalse(this._ready, "Should not be called multiple times.");
+
+    if (!this._initialRevisions) {
+      this._initialRevisions = true;
+      this._trigger(FirebaseAdapterEvent.InitialRevisions);
+    }
 
     // Compose the checkpoint and all subsequent revisions into a single operation to apply at once.
     this._revision = this._checkpointRevision;

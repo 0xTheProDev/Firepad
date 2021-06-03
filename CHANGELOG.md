@@ -24,21 +24,25 @@ Good to have: commit or PR links.
 
 ## v0.1.0 - [#24](https://github.com/interviewstreet/firepad-x/pull/24)
 
-  ### Added
-  - Cursor Widget that announces User's name in front of his/her cursor.
-  - Github Action workflow to relase package seamlessly to NPM public Registry.
-  - Support for separate Stable and Beta release to accomodate users for their specific usecases.
+### Added
 
-  ### Changed
-  - Renamed package from `firepad-x` to `@hackerrank/firepad`.
-  - Migrated codebase to Typescript with emphasis upon Adapter Pattern (Hexagonal Architecture).
-  - Exposed multiple interfaces to allow each moving parts to work sustainably without actually depending on them.
-  - Interfaces also allows consumer application to put forward custom implementation of part of the product.
-  - Migrated Build Environment to TypeScript-Webpack to facilitate for easier development experience wih hot-reloading and other features.
-  - Build Environment produces ES Modules and Type Definition files along with existing Single JavaScript bundle.
-  - Moved Firebase Configuration to Runtime Environment to allow seamless customisation.
-  - Added pre-commit hook with Prettier to maintain code quality.
+- Cursor Widget that announces User's name in front of his/her cursor.
+- Github Action workflow to relase package seamlessly to NPM public Registry.
+- Support for separate Stable and Beta release to accomodate users for their specific usecases.
 
-  ### Removed
-  - Grunt workflow is removed with all it's dependencies.
-  - Removed unused modules and examples except for Firebase and Monaco related ones.
+### Changed
+
+- Renamed package from `firepad-x` to `@hackerrank/firepad`.
+- Migrated codebase to Typescript with emphasis upon Adapter Pattern (Hexagonal Architecture).
+- Exposed multiple interfaces to allow each moving parts to work sustainably without actually depending on them.
+- Interfaces also allows consumer application to put forward custom implementation of part of the product.
+- Migrated Build Environment to TypeScript-Webpack to facilitate for easier development experience wih hot-reloading and other features.
+- Build Environment produces ES Modules and Type Definition files along with existing Single JavaScript bundle.
+- Migrated Test Setup and Environment to Jest with Coverage report from Istanbul.
+- Moved Firebase Configuration to Runtime Environment to allow seamless customisation.
+- Added pre-commit hook with Prettier to maintain code quality.
+
+### Removed
+
+- Grunt workflow is removed with all it's dependencies.
+- Removed unused modules and examples except for Firebase and Monaco related ones.

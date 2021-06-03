@@ -37,7 +37,7 @@ function isMasterBranch() {
  * @returns True if the current Configuration allows to release Beta version, else False otherwise.
  */
 function enableBetaRelease() {
-  return ["True", "true", "1", 1, true].includes(process.env.ENABLE_BETA);
+  return ["True", "true", "1"].includes(process.env.ENABLE_BETA);
 }
 
 /**
@@ -180,6 +180,7 @@ async function main() {
   const isMaster = isMasterBranch();
 
   if (!isMaster && !enableBetaRelease()) {
+    console.log("Beta release is disabled for this repository.");
     return;
   }
 

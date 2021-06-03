@@ -41,7 +41,7 @@ export type DatabaseAdapterCallbackType = {
   [DatabaseAdapterEvent.Operation]: EventListener<ITextOperation>;
   [DatabaseAdapterEvent.Acknowledge]: EventListener<IDatabaseAdapterEvent>;
   [DatabaseAdapterEvent.CursorChange]: EventListener<string>;
-  [DatabaseAdapterEvent.InitialRevisions]: EventListener<string>;
+  [DatabaseAdapterEvent.InitialRevisions]: EventListener<boolean>;
 };
 
 /**

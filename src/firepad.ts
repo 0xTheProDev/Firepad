@@ -148,10 +148,6 @@ export class Firepad implements IFirepad {
       }
     );
 
-    this._databaseAdapter.on(DatabaseAdapterEvent.InitialRevisions, () => {
-      this._editorAdapter.setInitiated(true);
-    });
-
     this._databaseAdapter.on(DatabaseAdapterEvent.Ready, () => {
       this._ready = true;
 

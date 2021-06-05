@@ -136,7 +136,7 @@ export function validateInEquality(
   if (first === second) {
     throw new ValidationError(
       err ||
-        `Validation failed: Expected ${first.toString()} to not be equal to ${second.toString()}.`
+        `Expected ${first.toString()} to not be equal to ${second.toString()}.`
     );
   }
 }

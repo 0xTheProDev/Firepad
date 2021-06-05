@@ -20,9 +20,9 @@ export interface IUndoManager extends Utils.IDisposable {
    */
   add(operation: ITextOperation, compose?: boolean): void;
   /**
-   * Returns last entry in the undo stack.
+   * Returns last entry in the undo stack if exists.
    */
-  last(): ITextOperation;
+  last(): ITextOperation | null;
   /**
    * Transform the undo and redo stacks against a operation by another client.
    */
@@ -136,7 +136,11 @@ export class UndoManager implements IUndoManager {
     }
   }
 
-  last(): ITextOperation {
+  last(): ITextOperation | null {
+    if (this._undoStack.length === 0) {
+      return null;
+    }
+
     return this._undoStack[this._undoStack.length - 1].clone();
   }
 
@@ -179,7 +183,7 @@ export class UndoManager implements IUndoManager {
   performRedo(callback: UndoManagerCallbackType): void {
     this._state = UndoManagerState.Redoing;
 
-    Utils.validateInEquality(this._undoStack.length, 0, "redo not possible");
+    Utils.validateInEquality(this._redoStack.length, 0, "redo not possible");
 
     callback(this._redoStack.pop()!);
     this._state = UndoManagerState.Normal;

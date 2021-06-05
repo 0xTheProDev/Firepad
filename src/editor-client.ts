@@ -121,7 +121,7 @@ export class EditorClient implements IEditorClient {
         this._client.serverAck();
         this._updateCursor();
         this._sendCursor(this._cursor);
-        this._emitStatus();
+        this._emitSynced();
       },
       retry: () => {
         this._client.serverRetry();
@@ -210,10 +210,8 @@ export class EditorClient implements IEditorClient {
     return this._emitter?.trigger(event, eventArgs || {}, ...extraArgs);
   }
 
-  protected _emitStatus() {
-    setTimeout(() => {
-      this._trigger(EditorClientEvent.Synced, this._client.isSynchronized());
-    });
+  protected _emitSynced() {
+    this._trigger(EditorClientEvent.Synced, this._client.isSynchronized());
   }
 
   protected _getClientObject(clientId: string): IRemoteClient {
@@ -294,7 +292,6 @@ export class EditorClient implements IEditorClient {
     this._editorAdapter.applyOperation(operation);
     this._updateCursor();
     this._undoManager!.transform(new WrappedOperation(operation));
-    this._emitStatus();
   }
 
   protected _sendCursor(cursor: ICursor | null) {

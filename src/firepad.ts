@@ -124,12 +124,6 @@ export class Firepad implements IFirepad {
       return new Firepad(databaseAdapter, editorAdapter, options);
     }
 
-    Utils.validateEquality(
-      editorAdapter.getText(),
-      "",
-      "Editor should be empty before initialisation of Firepad"
-    );
-
     this._ready = false;
     this._zombie = false;
     this._options = options;

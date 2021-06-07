@@ -25,9 +25,6 @@ export function fromMonaco(
   const userName: string = options.userName || userId.toString();
   const defaultText: string = options.defaultText || editor.getValue();
 
-  // Ensure editor content is empty before wrapping inside adapter.
-  editor.setValue("");
-
   const databaseAdapter = new FirebaseAdapter(
     databaseRef,
     userId,

@@ -404,6 +404,7 @@ export class MonacoAdapter implements IEditorAdapter {
   }
 
   setInitiated(init: boolean): void {
+    this._monaco.setValue(""); // Perfomance boost on clearing editor after network calls
     this._initiated = init;
   }
 

@@ -238,6 +238,10 @@ export class EditorClient implements IEditorClient {
       );
 
     const inverseMeta = new OperationMeta(this._cursor, cursorBefore);
+    console.log(
+      "🚀 ~ file: editor-client.ts ~ line 231 ~ EditorClient Undooperation ad ~ _onChange ~ _onChange",
+      inverseMeta
+    );
     this._undoManager!.add(new WrappedOperation(inverse, inverseMeta), compose);
     this._client.applyClient(operation);
   }

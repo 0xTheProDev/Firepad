@@ -133,7 +133,7 @@ class Synchronized implements IClientSynchronizationState {
     // When we receive a new operation from the server, the operation can be
     // simply applied to the current document
     console.log(
-      "🚀 ~ file: client.ts ~ line 105 ~ Apply server Synchronized ~ operation",
+      "📥 ~ file: client.ts ~ line 105 ~ From remote ~ operation",
       operation,
       client
     );

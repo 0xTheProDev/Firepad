@@ -143,11 +143,11 @@ export class UndoManager implements IUndoManager {
         break;
     }
     console.log(
-      "🚀 ~ file: undo-manager.ts ~ line 143 ~ UndoManager ~ add ~ this._undoStack",
+      "➕ ~ file: undo-manager.ts ~ line 143 ~ UndoStack ~ add ~ this._undoStack",
       this._undoStack
     );
     console.log(
-      "🚀 ~ file: undo-manager.ts ~ line 143 ~ UndoManager ~ add ~ this._redoStack",
+      "➕ ~ file: undo-manager.ts ~ line 143 ~ RedoStack ~ add ~ this._redoStack",
       this._redoStack
     );
   }

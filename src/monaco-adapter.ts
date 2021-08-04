@@ -98,7 +98,7 @@ export class MonacoAdapter implements IEditorAdapter {
       this._monaco.onDidChangeModelContent(
         (ev: monaco.editor.IModelContentChangedEvent) => {
           console.log(
-            "🚀 ~ file: monaco-adapter.ts ~ line 102 ~ MonacoAdapter remote source suspected ~ _init ~ onDidChangeModelContent",
+            "✏️ ~ file: monaco-adapter.ts ~ line 102 ~ OnDidChangeDocument ~ _init ~ onDidChangeModelContent",
             ev
           );
           this._onChange(ev);
@@ -590,10 +590,6 @@ export class MonacoAdapter implements IEditorAdapter {
     ev: Pick<monaco.editor.IModelContentChangedEvent, "changes">
   ): void {
     /** Ignore if change is being applied by firepad itself. */
-    console.log(
-      "🚀 ~ file: monaco-adapter.ts ~ line 598 Onchange ~ MonacoAdapter ~ this._ignoreChanges",
-      this._ignoreChanges
-    );
     if (this._ignoreChanges || !this._initiated) {
       return;
     }
@@ -621,11 +617,6 @@ export class MonacoAdapter implements IEditorAdapter {
   }
 
   protected _onModelChange(_ev: monaco.editor.IModelChangedEvent): void {
-    console.log(
-      "🚀 ~ file: monaco-adapter.ts ~ line 628 suspected user manual change ~ MonacoAdapter ~ _onModelChange ~ _onModelChange",
-      _ev
-    );
-
     const newModel = this._getModel();
 
     if (!newModel) {

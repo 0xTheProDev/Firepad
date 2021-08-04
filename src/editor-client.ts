@@ -236,10 +236,6 @@ export class EditorClient implements IEditorClient {
       inverse.shouldBeComposedWithInverted(this._undoManager.last()!);
 
     const inverseMeta = new OperationMeta(this._cursor, cursorBefore);
-    console.log(
-      "🚀 ~ file: editor-client.ts ~ line 231 ~ EditorClient Undooperation ad ~ _onChange ~ _onChange",
-      inverseMeta
-    );
     this._undoManager!.add(new WrappedOperation(inverse, inverseMeta), compose);
     this._client.applyClient(operation);
   }
@@ -270,6 +266,10 @@ export class EditorClient implements IEditorClient {
     }
 
     this._undoManager.performUndo((operation: IWrappedOperation) => {
+      console.log(
+        "🔁 ~ file: editor-client.ts ~ line 273 ~ Undo applied",
+        operation
+      );
       this._applyUnredo(operation);
       this._trigger(EditorClientEvent.Undo, operation.toString());
     });
@@ -281,6 +281,10 @@ export class EditorClient implements IEditorClient {
     }
 
     this._undoManager.performRedo((operation: IWrappedOperation) => {
+      console.log(
+        "🔂 ~ file: editor-client.ts ~ line 273 ~ Redo applied",
+        operation
+      );
       this._applyUnredo(operation);
       this._trigger(EditorClientEvent.Redo, operation.toString());
     });

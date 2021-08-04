@@ -9,8 +9,8 @@
 [![Weekly Downloads](https://img.shields.io/npm/dw/@hackerrank/firepad)](https://www.npmjs.com/package/@hackerrank/firepad)
 [![Built With](https://img.shields.io/badge/built%20with-webpack-green)](https://webpack.js.org)
 [![Tested With](https://img.shields.io/badge/tested%20with-jest-yellowgreen)](https://jestjs.io)
-[![Types](https://img.shields.io/npm/types/@hackerrank/firepad?label=typed%20with)](https://www.typescriptlang.org)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://prettier.io)
+[![Typed With](https://img.shields.io/npm/types/@hackerrank/firepad?label=typed%20with)](https://www.typescriptlang.org)
+[![Styled With](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square&label=styled%20with)](https://prettier.io)
 [![License](https://img.shields.io/npm/l/@hackerrank/firepad)](LICENSE)
 [![Open Issues](https://img.shields.io/github/issues-raw/interviewstreet/firepad-x)](https://github.com/interviewstreet/firepad-x/issues)
 [![Closed Issues](https://img.shields.io/github/issues-closed-raw/interviewstreet/firepad-x)](https://github.com/interviewstreet/firepad-x/issues?q=is%3Aissue+is%3Aclosed)
@@ -87,6 +87,22 @@ class MyEditorAdapter implements IEditorAdapter {
 ```
 
 Similar thing can be done for Database as well by implementing `IDatabaseAdapter` interface. Keep in mind, you might also need to implement event handlers and event triggers depending upon nature of the adapters.
+
+### Dispose
+
+After Firepad usecase is over, it is recommended to cleanup all the resources (e.g., memory, network etc.) using `dispose()` method. Note that, making any further API call after calling `dispose()` will result into error.
+
+```ts
+...
+
+const firepad = new Firepad(databaseAdapter, editorAdapter, options);
+
+...
+
+firepad.dispose();
+```
+
+Here is a beginner friendly guide on [How to setup Collaborative Editor Experience with Monaco Editor and Firebase](https://dev.to/shubham567/collaborative-coding-in-monaco-editor-4foa).
 
 ## Development
 

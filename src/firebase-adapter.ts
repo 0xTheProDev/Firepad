@@ -583,6 +583,7 @@ export class FirebaseAdapter implements IDatabaseAdapter {
       return;
     }
 
+    console.log('Console ~ file: firebase-adapter.ts ~ line 597 ~ FirebaseAdapter ~ setUserColor ~ userColor', userColor);
     this._userRef.child("color").set(userColor);
     this._userColor = userColor;
   }

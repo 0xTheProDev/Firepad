@@ -55,6 +55,7 @@ export class CursorWidgetController implements ICursorWidgetController {
     userColor: string,
     userName?: string
   ): void {
+    console.log('Console ~ file: cursor-widget-controller.ts ~ line 58 ~ CursorWidgetController ~ addCursor ~ userName', userName, userColor, clientId);
     const cursorWidget = new CursorWidget({
       codeEditor: this._editor,
       widgetId: clientId,
@@ -71,6 +72,7 @@ export class CursorWidgetController implements ICursorWidgetController {
   }
 
   removeCursor(clientId: ClientIDType): void {
+    console.log('Console ~ file: cursor-widget-controller.ts ~ line 75 ~ CursorWidgetController ~ removeCursor ~ clientId', clientId);
     const cursorWidget = this._cursors.get(clientId);
 
     if (!cursorWidget) {
@@ -88,6 +90,7 @@ export class CursorWidgetController implements ICursorWidgetController {
     userColor: string,
     userName?: string
   ): void {
+    console.log('Console ~ file: cursor-widget-controller.ts ~ line 93 ~ CursorWidgetController ~ updateCursor', userColor, userName, clientId);
     const cursorWidget = this._cursors.get(clientId);
 
     if (cursorWidget) {

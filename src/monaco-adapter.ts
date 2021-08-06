@@ -739,6 +739,8 @@ export class MonacoAdapter implements IEditorAdapter {
     backgroundColor: string,
     fontColor: string
   ): string {
+    console.log('Console ~ file: monaco-adapter.ts ~ line 742 ~ MonacoAdapter ~ backgroundColor', className, backgroundColor, fontColor);
+
     return `
       .${className} {
         position: relative;
